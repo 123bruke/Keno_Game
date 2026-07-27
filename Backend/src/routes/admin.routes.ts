@@ -14,6 +14,7 @@ router.get("/analytics", controller.getFinancialAnalytics);
 
 router.get("/users", controller.getUsers);
 router.patch("/users/:id/status", controller.updateUserStatus);
+router.patch("/users/:id/role", controller.updateUserRole);
 
 router.get("/reports", controller.getReports);
 

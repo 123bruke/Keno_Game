@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { AdminService } from "../services/admin.service";
 import { success } from "../utils/response";
 import { z } from "zod";
-import { UserStatus } from "@prisma/client";
+import { Role, UserStatus } from "@prisma/client";
 
 const UpdateSettingsSchema = z.object({
   numberPoolSize: z.number().int().min(20).max(100).optional(),
@@ -19,6 +19,10 @@ const UpdateSettingsSchema = z.object({
 
 const UpdateUserStatusSchema = z.object({
   status: z.nativeEnum(UserStatus),
+});
+
+const UpdateUserRoleSchema = z.object({
+  role: z.nativeEnum(Role),
 });
 
 export class AdminController {
@@ -70,6 +74,17 @@ export class AdminController {
       const { status } = UpdateUserStatusSchema.parse(req.body);
       const updated = await this.adminService.setUserStatus(id, status);
       return success(res, updated, `User status updated to ${status}`);
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  updateUserRole = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const id = String(req.params.id);
+      const { role } = UpdateUserRoleSchema.parse(req.body);
+      const updated = await this.adminService.setUserRole(id, role);
+      return success(res, updated, `User role updated to ${role}`);
     } catch (err) {
       next(err);
     }

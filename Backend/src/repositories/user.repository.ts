@@ -27,10 +27,21 @@ export class UserRepository {
     lastName?: string;
     role?: Role;
   }) {
+    let finalUsername = data.username;
+
+    if (finalUsername) {
+      const existing = await prisma.user.findUnique({
+        where: { username: finalUsername },
+      });
+      if (existing) {
+        finalUsername = `${data.username}_${data.telegramId.toString().slice(-4)}`;
+      }
+    }
+
     return prisma.user.create({
       data: {
         telegramId: data.telegramId,
-        username: data.username,
+        username: finalUsername,
         firstName: data.firstName,
         lastName: data.lastName,
         role: data.role ?? Role.USER,
@@ -48,6 +59,14 @@ export class UserRepository {
     return prisma.user.update({
       where: { id: userId },
       data: { status },
+    });
+  }
+
+  async updateRole(userId: string, role: Role) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: { role },
+      include: { wallet: true },
     });
   }
 
