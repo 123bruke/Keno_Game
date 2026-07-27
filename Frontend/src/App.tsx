@@ -58,9 +58,7 @@ function AppContent() {
       try {
         const parsed = JSON.parse(cachedUser);
         setCurrentUser(parsed);
-        if (parsed.role === "ADMIN") {
-          setActiveTab("admin");
-        }
+        setActiveTab(parsed.role === "ADMIN" ? "admin" : "home");
       } catch {}
     } else {
       ensureAuth().then(() => {
@@ -68,9 +66,7 @@ function AppContent() {
         if (stored) {
           const parsed = JSON.parse(stored);
           setCurrentUser(parsed);
-          if (parsed.role === "ADMIN") {
-            setActiveTab("admin");
-          }
+          setActiveTab(parsed.role === "ADMIN" ? "admin" : "home");
         }
       });
     }
@@ -112,14 +108,19 @@ function AppContent() {
     return <SplashScreen onFinish={() => setShowSplash(false)} />;
   }
 
-  // If user is Admin or activeTab is admin, render Full-Screen Admin Dashboard Portal!
-  if (activeTab === "admin") {
+  // Role-based guard: admin dashboard only for ADMIN role
+  if (activeTab === "admin" && currentUser?.role === "ADMIN") {
     return (
       <>
         <AdminDashboard onSwitchToPlayer={() => setActiveTab("home")} />
         {showDevLogin && <DevLoginModal onClose={() => setShowDevLogin(false)} />}
       </>
     );
+  }
+
+  // Non-admin trying to access admin tab → force to home
+  if (activeTab === "admin") {
+    setActiveTab("home");
   }
 
   return (

@@ -39,9 +39,8 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
       // Refresh query data with new auth token
       qc.invalidateQueries();
 
-      if ((customRole || role) === "ADMIN") {
-        setActiveTab("admin");
-      }
+      // Role-based redirect: ADMIN → admin dashboard, USER → home
+      setActiveTab((customRole || role) === "ADMIN" ? "admin" : "home");
 
       onClose();
     } catch (err: any) {
