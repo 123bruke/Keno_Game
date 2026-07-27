@@ -7,6 +7,21 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum GameMode {
+  CLASSIC
+  INSTANT
+}
+
 enum TransactionType {
   DEPOSIT
   WITHDRAW
@@ -22,22 +37,36 @@ enum TransactionStatus {
 }
 
 enum GameStatus {
-  PENDING
+  WAITING
+  DRAWING
   COMPLETED
+  CANCELLED
+}
+
+enum TicketStatus {
+  PENDING
+  WON
+  LOST
+  CANCELLED
 }
 
 model User {
-  id          String   @id @default(uuid())
-  telegramId  BigInt   @unique
-  username    String?  @unique
+  id          String     @id @default(uuid())
+  telegramId  BigInt     @unique
+  username    String?    @unique
   firstName   String?
   lastName    String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  role        Role       @default(USER)
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
 
   wallet       Wallet?
   tickets      Ticket[]
   transactions Transaction[]
+
+  @@index([telegramId])
+  @@index([role])
 }
 
 model Wallet {
@@ -56,62 +85,79 @@ model Wallet {
 }
 
 model KenoGame {
-  id            String   @id @default(uuid())
+  id          String      @id @default(uuid())
+  roundNumber Int         @unique
 
-  roundNumber   Int      @unique
-  drawNumbers   Int[]
+  mode        GameMode    @default(CLASSIC)
+  status      GameStatus  @default(WAITING)
 
-  status        GameStatus @default(PENDING)
+  drawNumbers Int[]
 
-  createdAt     DateTime @default(now())
-  finishedAt    DateTime?
+  startedAt   DateTime    @default(now())
+  finishedAt  DateTime?
 
-  tickets Ticket[]
+  tickets     Ticket[]
+  fairness    FairnessRecord?
 
-  fairness FairnessRecord?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([roundNumber])
+  @@index([status])
+  @@index([mode])
 }
 
 model Ticket {
-  id String @id @default(uuid())
+  id              String        @id @default(uuid())
 
-  userId String
-  gameId String
+  userId          String
+  gameId          String
 
+  mode            GameMode      @default(CLASSIC)
   selectedNumbers Int[]
 
-  betAmount Decimal @db.Decimal(18,2)
+  betAmount       Decimal       @db.Decimal(18,2)
 
-  matches Int?
+  matches         Int           @default(0)
 
-  multiplier Decimal? @db.Decimal(10,2)
+  multiplier      Decimal       @default(0) @db.Decimal(18,2)
 
-  payout Decimal? @db.Decimal(18,2)
+  payout          Decimal       @default(0) @db.Decimal(18,2)
 
-  createdAt DateTime @default(now())
+  status          TicketStatus  @default(PENDING)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  game KenoGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  user            User          @relation(fields: [userId], references: [id])
+  game            KenoGame      @relation(fields: [gameId], references: [id])
+
+  @@index([userId])
+  @@index([gameId])
+  @@index([status])
 }
 
 model Transaction {
-  id String @id @default(uuid())
+  id              String              @id @default(uuid())
 
-  userId String
+  userId          String
+  user            User                @relation(fields: [userId], references: [id])
 
-  type TransactionType
+  type            TransactionType
+  status          TransactionStatus   @default(SUCCESS)
 
-  amount Decimal @db.Decimal(18,2)
+  amount          Decimal             @db.Decimal(18,2)
 
-  balanceBefore Decimal @db.Decimal(18,2)
+  balanceBefore   Decimal             @db.Decimal(18,2)
+  balanceAfter    Decimal             @db.Decimal(18,2)
 
-  balanceAfter Decimal @db.Decimal(18,2)
+  reference       String?
 
-  status TransactionStatus @default(SUCCESS)
+  createdAt       DateTime            @default(now())
 
-  createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
 }
 
 model FairnessRecord {
@@ -128,4 +174,20 @@ model FairnessRecord {
   nonce Int
 
   game KenoGame @relation(fields: [gameId], references: [id], onDelete: Cascade)
+}
+
+model GameSettings {
+  id                 String   @id @default("default")
+  numberPoolSize     Int      @default(80)
+  drawCount          Int      @default(20)
+  minPick            Int      @default(1)
+  maxPick            Int      @default(10)
+  minBet             Decimal  @default(1) @db.Decimal(18,2)
+  maxBet             Decimal  @default(10000) @db.Decimal(18,2)
+  payoutTable        Json
+  rtpPercentage      Decimal  @default(95.0) @db.Decimal(5,2)
+  houseEdge          Decimal  @default(5.0) @db.Decimal(5,2)
+  drawIntervalSec    Int      @default(30)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 }
