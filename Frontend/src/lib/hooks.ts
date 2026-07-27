@@ -1,5 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { walletApi, gameApi, adminApi } from "./api";
+import { walletApi, gameApi } from "./api";
+
+export {
+  useAdminSettings,
+  useUpdateAdminSettings,
+  useAdminAnalytics,
+  useAdminUsers,
+  useUpdateUserStatus,
+  useUpdateUserRole,
+  useAdminReports,
+} from "../features/admin/hooks";
 
 export function useWallet() {
   return useQuery({
@@ -90,57 +100,4 @@ export function useVerify() {
   });
 }
 
-// Admin Hooks
-export function useAdminSettings() {
-  return useQuery({
-    queryKey: ["adminSettings"],
-    queryFn: adminApi.settings,
-  });
-}
 
-export function useUpdateAdminSettings() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (data: any) => adminApi.updateSettings(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminSettings"] }),
-  });
-}
-
-export function useAdminAnalytics() {
-  return useQuery({
-    queryKey: ["adminAnalytics"],
-    queryFn: adminApi.analytics,
-  });
-}
-
-export function useAdminUsers(page = 1, limit = 10, search?: string) {
-  return useQuery({
-    queryKey: ["adminUsers", page, limit, search],
-    queryFn: () => adminApi.users(page, limit, search),
-  });
-}
-
-export function useUpdateUserStatus() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ userId, status }: { userId: string; status: "ACTIVE" | "SUSPENDED" }) =>
-      adminApi.updateUserStatus(userId, status),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminUsers"] }),
-  });
-}
-
-export function useUpdateUserRole() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: "USER" | "ADMIN" }) =>
-      adminApi.updateUserRole(userId, role),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["adminUsers"] }),
-  });
-}
-
-export function useAdminReports() {
-  return useQuery({
-    queryKey: ["adminReports"],
-    queryFn: adminApi.reports,
-  });
-}

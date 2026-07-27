@@ -12,7 +12,7 @@ import Wallet from "./components/Wallet";
 import History from "./components/History";
 import ProvablyFair from "./components/ProvablyFair";
 import Profile from "./components/Profile";
-import AdminDashboard from "./components/AdminDashboard";
+import AdminDashboard from "./features/admin/AdminDashboard";
 import DevLoginModal from "./components/DevLoginModal";
 import { Home as HomeIcon, Clock, WalletIcon, ShieldCheck, User as UserIcon, KeyRound, ArrowLeft } from "lucide-react";
 
