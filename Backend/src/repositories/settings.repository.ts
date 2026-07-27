@@ -1,5 +1,6 @@
 import prisma from "../config/prisma";
 import { Prisma } from "@prisma/client";
+import { redisService } from "../services/redis.service";
 
 export type PayoutTable = Record<string, Record<string, number>>;
 
@@ -16,8 +17,15 @@ export const DEFAULT_PAYOUT_TABLE: PayoutTable = {
   "10": { "0": 2, "5": 2, "6": 15, "7": 100, "8": 500, "9": 3000, "10": 100000 }
 };
 
+const SETTINGS_CACHE_KEY = "keno:settings";
+
 export class SettingsRepository {
   async getSettings(tx?: Prisma.TransactionClient) {
+    if (!tx) {
+      const cached = await redisService.getJson<any>(SETTINGS_CACHE_KEY);
+      if (cached) return cached;
+    }
+
     const client = tx || prisma;
     let settings = await client.gameSettings.findUnique({
       where: { id: "default" },
@@ -41,6 +49,10 @@ export class SettingsRepository {
       });
     }
 
+    if (!tx) {
+      await redisService.setJson(SETTINGS_CACHE_KEY, settings, 600);
+    }
+
     return settings;
   }
 
@@ -56,7 +68,7 @@ export class SettingsRepository {
     houseEdge?: number;
     drawIntervalSec?: number;
   }) {
-    return prisma.gameSettings.upsert({
+    const updated = await prisma.gameSettings.upsert({
       where: { id: "default" },
       update: {
         ...(data.numberPoolSize !== undefined && { numberPoolSize: data.numberPoolSize }),
@@ -84,5 +96,8 @@ export class SettingsRepository {
         drawIntervalSec: data.drawIntervalSec ?? 30,
       },
     });
+
+    await redisService.del(SETTINGS_CACHE_KEY);
+    return updated;
   }
 }
