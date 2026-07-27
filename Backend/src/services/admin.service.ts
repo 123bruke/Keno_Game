@@ -1,5 +1,5 @@
 import prisma from "../config/prisma";
-import { UserStatus } from "@prisma/client";
+import { Role, UserStatus } from "@prisma/client";
 import { SettingsRepository } from "../repositories/settings.repository";
 import { UserRepository } from "../repositories/user.repository";
 
@@ -66,6 +66,10 @@ export class AdminService {
 
   async setUserStatus(userId: string, status: UserStatus) {
     return this.userRepo.updateStatus(userId, status);
+  }
+
+  async setUserRole(userId: string, role: Role) {
+    return this.userRepo.updateRole(userId, role);
   }
 
   async getReports() {
