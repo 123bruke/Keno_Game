@@ -4,6 +4,7 @@ import authRoutes from "./routes/auth.routes";
 import walletRoutes from "./routes/wallet.route";
 import gameRoutes from "./routes/game.routes";
 import adminRoutes from "./routes/admin.routes";
+import paymentWalletRoutes from "./payment/routes/wallet.routes";
 import { errorHandler } from "./middleware/error.middleware";
 
 // Prevent BigInt serialization TypeError in JSON responses
@@ -36,6 +37,7 @@ app.get("/", (_, res) => {
 
 app.use("/auth", authRoutes);
 app.use("/", walletRoutes);
+app.use("/", paymentWalletRoutes);
 app.use("/games/keno", gameRoutes);
 app.use("/admin", adminRoutes);
 
