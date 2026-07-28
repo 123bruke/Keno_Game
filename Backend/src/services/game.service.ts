@@ -1,13 +1,14 @@
+import { FairnessService } from "./fairness.service";
 import { Prisma, GameMode } from "@prisma/client";
 import { GameRepository } from "../repositories/game.repository";
 import prisma from "../config/prisma";
 
 export class GameService {
   private repository = new GameRepository();
+  private fairness = new FairnessService();
 
   async getOrCreateCurrentGame(tx?: Prisma.TransactionClient) {
     let game = await this.repository.findCurrent(tx);
-
     if (game) {
       return game;
     }
@@ -15,13 +16,17 @@ export class GameService {
     if (tx) {
       const latest = await this.repository.findLatest(tx);
       const nextRound = latest ? latest.roundNumber + 1 : 1;
-      return this.repository.create(tx, nextRound);
+      const newGame = await this.repository.create(tx, nextRound);
+      await this.fairness.commit(tx, newGame.id);
+      return newGame;
     }
 
     return prisma.$transaction(async (innerTx) => {
       const latest = await this.repository.findLatest(innerTx);
       const nextRound = latest ? latest.roundNumber + 1 : 1;
-      return this.repository.create(innerTx, nextRound);
+      const newGame = await this.repository.create(innerTx, nextRound);
+      await this.fairness.commit(innerTx, newGame.id);
+      return newGame;
     });
   }
 

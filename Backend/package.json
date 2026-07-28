@@ -5,7 +5,7 @@
   "main": "server.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn src/server.ts",
-    "build": "tsc",
+    "build": "tsc && mkdir -p dist/assets && cp src/assets/*.png dist/assets/",
     "start": "node dist/server.js"
   },
   "author": "",
