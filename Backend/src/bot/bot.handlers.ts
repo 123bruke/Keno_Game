@@ -17,7 +17,7 @@ import { t, type Lang } from "./translations";
 
 type Bot = any;
 
-const WEBAPP_URL = env.WEBAPP_URL || "https://mines-telegram-games.vercel.app";
+const WEBAPP_URL = env.WEBAPP_URL || "https://keno-game-fawn.vercel.app";
 
 // ─── Config ───────────────────────────────────────────────────────────
 // TODO: Replace with the real support account when available.
