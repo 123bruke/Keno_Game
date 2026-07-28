@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Flame } from "lucide-react";
+import { playSound } from "../lib/sound";
 
 export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   const [fade, setFade] = useState(false);
@@ -17,6 +18,7 @@ export default function SplashScreen({ onFinish }: { onFinish: () => void }) {
   return (
     <div
       onClick={() => {
+        playSound();
         setFade(true);
         setTimeout(onFinish, 200);
       }}

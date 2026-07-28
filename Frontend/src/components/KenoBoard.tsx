@@ -1,4 +1,5 @@
 import { useAppStore } from "../lib/store";
+import { playSound } from "../lib/sound";
 
 export default function KenoBoard({
   winningNumbers,
@@ -34,7 +35,7 @@ export default function KenoBoard({
           return (
             <button
               key={num}
-              onClick={() => toggleNumber(num)}
+              onClick={() => { playSound('select'); toggleNumber(num); }}
               disabled={isRevealed && isRevealed}
               className={`aspect-square rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center ${bgStyle} ${glowClass} disabled:cursor-not-allowed`}
             >

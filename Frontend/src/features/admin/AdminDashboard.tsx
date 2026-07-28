@@ -9,6 +9,7 @@ import {
   useUpdateUserRole,
 } from "./hooks";
 import { useAppStore } from "../../lib/store";
+import { playSound } from "../../lib/sound";
 import {
   Settings,
   TrendingUp,
@@ -167,7 +168,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
 
           {onSwitchToPlayer && (
             <button
-              onClick={onSwitchToPlayer}
+              onClick={() => { playSound(); onSwitchToPlayer?.(); }}
               className="flex items-center gap-1.5 text-xs font-bold text-slate-300 bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-full border border-white/10 transition-all"
             >
               <Gamepad2 size={14} className="text-[#22D3EE]" />
@@ -192,7 +193,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
             return (
               <button
                 key={t.id}
-                onClick={() => setAdminTab(t.id as any)}
+                onClick={() => { playSound(); setAdminTab(t.id as any); }}
                 className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-extrabold flex items-center justify-center gap-2 transition-all whitespace-nowrap ${
                   isActive
                     ? "bg-gradient-to-r from-[#C084FC] to-[#22D3EE] text-black shadow-lg shadow-[#C084FC]/25"
@@ -333,7 +334,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
                     <p className="text-xs text-slate-400">Configure keno number range and draw mechanics</p>
                   </div>
                 </div>
-                <button onClick={refreshAll} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400">
+                <button onClick={() => { playSound(); refreshAll(); }} className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400">
                   <RefreshCw size={18} />
                 </button>
               </div>
@@ -462,6 +463,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
                 </div>
                 <button
                   onClick={() => {
+                    playSound();
                     if (!editingPayouts) {
                       setPayoutDraft(JSON.stringify(currentPayoutTable, null, 2));
                     }
@@ -527,7 +529,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
             )}
 
             <button
-              onClick={handleUpdateSettings}
+              onClick={() => { playSound('success'); handleUpdateSettings(); }}
               disabled={updateSettings.isPending}
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-black text-sm shadow-xl shadow-[#C084FC]/25 transition-all hover:scale-[1.005] active:scale-[0.995] disabled:opacity-50"
             >
@@ -626,7 +628,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
                     <div className="pt-2 border-t border-white/10 flex items-center justify-end gap-2">
                       {currentUser?.role === "SUPERADMIN" && (
                         <button
-                          onClick={() => handleToggleRole(u.id, u.role)}
+                          onClick={() => { playSound(); handleToggleRole(u.id, u.role); }}
                           disabled={updateUserRole.isPending}
                           className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
                             isAdmin
@@ -640,7 +642,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
                       )}
 
                       <button
-                        onClick={() => handleToggleStatus(u.id, u.status)}
+                        onClick={() => { playSound(); handleToggleStatus(u.id, u.status); }}
                         disabled={updateUserStatus.isPending}
                         className={`p-2 rounded-xl text-xs font-bold transition-all ${
                           isSuspended
@@ -665,7 +667,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
             {usersData && usersData.totalPages > 1 && (
               <div className="flex items-center justify-center gap-2 pt-4">
                 <button
-                  onClick={() => setUserPage((p) => Math.max(1, p - 1))}
+                  onClick={() => { playSound(); setUserPage((p) => Math.max(1, p - 1)); }}
                   disabled={userPage <= 1}
                   className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-400 hover:text-white disabled:opacity-30"
                 >
@@ -673,7 +675,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
                 </button>
                 <span className="text-xs text-slate-500 font-mono">{userPage} / {usersData.totalPages}</span>
                 <button
-                  onClick={() => setUserPage((p) => Math.min(usersData.totalPages, p + 1))}
+                  onClick={() => { playSound(); setUserPage((p) => Math.min(usersData.totalPages, p + 1)); }}
                   disabled={userPage >= usersData.totalPages}
                   className="px-3 py-1.5 rounded-xl text-xs font-bold bg-white/5 border border-white/10 text-slate-400 hover:text-white disabled:opacity-30"
                 >

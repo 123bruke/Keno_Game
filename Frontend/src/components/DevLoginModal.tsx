@@ -2,6 +2,7 @@ import { useState } from "react";
 import { authApi } from "../lib/api";
 import { useAppStore } from "../lib/store";
 import { useQueryClient } from "@tanstack/react-query";
+import { playSound } from "../lib/sound";
 import { UserCheck, Shield, KeyRound, X } from "lucide-react";
 
 export default function DevLoginModal({ onClose }: { onClose: () => void }) {
@@ -66,7 +67,7 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => { playSound(); onClose(); }}
             className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white"
           >
             <X size={16} />
@@ -78,7 +79,7 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
           <span className="text-[11px] text-slate-400">1-Click Presets:</span>
           <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={() => handleLogin("123456789", "player_one", "USER")}
+              onClick={() => { playSound('select'); handleLogin("123456789", "player_one", "USER"); }}
               disabled={loading}
               className="py-2.5 px-3 rounded-xl bg-[#12121c] hover:bg-[#1a1a2e] border border-white/10 text-xs font-bold text-[#C084FC] flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
             >
@@ -86,7 +87,7 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
               Login as Player
             </button>
             <button
-              onClick={() => handleLogin("999999999", "admin_keno", "ADMIN")}
+              onClick={() => { playSound('select'); handleLogin("999999999", "admin_keno", "ADMIN"); }}
               disabled={loading}
               className="py-2.5 px-3 rounded-xl bg-[#12121c] hover:bg-[#1a1a2e] border border-white/10 text-xs font-bold text-[#22D3EE] flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
             >
@@ -156,7 +157,7 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
         )}
 
         <button
-          onClick={() => handleLogin()}
+          onClick={() => { playSound('success'); handleLogin(); }}
           disabled={loading}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-extrabold text-xs shadow-lg shadow-[#C084FC]/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
         >

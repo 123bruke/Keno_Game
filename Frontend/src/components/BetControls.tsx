@@ -1,4 +1,5 @@
 import { useAppStore } from "../lib/store";
+import { playSound } from "../lib/sound";
 import { useWallet, useQuickPick } from "../lib/hooks";
 import { Zap, Trash2, Clock, Flame } from "lucide-react";
 
@@ -57,7 +58,7 @@ export default function BetControls({
       {/* Game Mode Selector */}
       <div className="flex bg-[#09090b] p-1 rounded-xl border border-white/10">
         <button
-          onClick={() => setGameMode("INSTANT")}
+          onClick={() => { playSound('select'); setGameMode("INSTANT"); }}
           className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
             gameMode === "INSTANT"
               ? "bg-[#C084FC] text-black shadow-md shadow-[#C084FC]/30"
@@ -68,7 +69,7 @@ export default function BetControls({
           Instant Keno
         </button>
         <button
-          onClick={() => setGameMode("CLASSIC")}
+          onClick={() => { playSound('select'); setGameMode("CLASSIC"); }}
           className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-1.5 transition-all ${
             gameMode === "CLASSIC"
               ? "bg-[#22D3EE] text-black shadow-md shadow-[#22D3EE]/30"
@@ -108,7 +109,7 @@ export default function BetControls({
           {[3, 5, 7, 10].map((n) => (
             <button
               key={n}
-              onClick={() => handleQuickPick(n)}
+              onClick={() => { playSound(); handleQuickPick(n); }}
               className="px-2 py-1 rounded-md bg-[#12121c] border border-white/10 text-xs font-bold text-[#C084FC] hover:bg-[#C084FC] hover:text-black transition-all"
             >
               Pick {n}
@@ -116,7 +117,7 @@ export default function BetControls({
           ))}
         </div>
         <button
-          onClick={clearSelection}
+          onClick={() => { playSound(); clearSelection(); }}
           disabled={selectedNumbers.length === 0}
           className="p-1.5 rounded-md bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 disabled:opacity-30 text-xs font-bold flex items-center gap-1"
           title="Clear Selection"
@@ -133,7 +134,7 @@ export default function BetControls({
 
       {/* Play Action Button */}
       <button
-        onClick={onPlay}
+        onClick={() => { playSound('success'); onPlay(); }}
         disabled={!canPlay || isPlaying}
         className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-extrabold text-base shadow-xl shadow-[#C084FC]/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
