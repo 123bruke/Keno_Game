@@ -23,7 +23,6 @@ import {
   CheckCircle2,
   Award,
   UserCog,
-  KeyRound,
   Gamepad2,
   Hash,
   Dices,
@@ -67,7 +66,7 @@ const DEFAULT_PAYOUT_TABLE: Record<string, Record<string, number>> = {
 
 export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?: () => void }) {
   const [adminTab, setAdminTab] = useState<"analytics" | "settings" | "users" | "reports">("analytics");
-  const { currentUser, setShowDevLogin } = useAppStore();
+  const { currentUser } = useAppStore();
 
   const { data: analytics, refetch: refetchAnalytics } = useAdminAnalytics();
   const { data: settings, refetch: refetchSettings } = useAdminSettings();
@@ -128,7 +127,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
   };
 
   const handleToggleRole = (userId: string, currentRole: string) => {
-    const newRole = currentRole === "ADMIN" ? "USER" : "ADMIN";
+    const newRole = currentRole === "SUPERADMIN" ? "ADMIN" : currentRole === "ADMIN" ? "USER" : "ADMIN";
     updateUserRole.mutate({ userId, role: newRole });
   };
 
@@ -154,7 +153,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
           </div>
           <div>
             <h1 className="text-lg font-black tracking-wide bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-white bg-clip-text text-transparent">
-              KENO CASINO ADMIN PORTAL
+              ኬኖ ADMIN PORTAL
             </h1>
             <p className="text-xs text-slate-400 font-medium">Production Management & Analytics Dashboard</p>
           </div>
@@ -163,16 +162,8 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 bg-[#12121c] px-3 py-1.5 rounded-full border border-white/10 text-xs">
             <span className="text-slate-300 font-semibold">@{currentUser?.username || "Admin"}</span>
-            <span className="text-[#22D3EE] font-bold">[ADMIN]</span>
+            <span className="text-[#22D3EE] font-bold">{currentUser?.role === "SUPERADMIN" ? "[SUPERADMIN]" : "[ADMIN]"}</span>
           </div>
-
-          <button
-            onClick={() => setShowDevLogin(true)}
-            className="flex items-center gap-1.5 text-xs font-bold text-[#C084FC] bg-[#12121c] px-3 py-1.5 rounded-full border border-[#C084FC]/30 hover:bg-[#C084FC]/20 transition-all"
-          >
-            <KeyRound size={14} />
-            Dev Auth
-          </button>
 
           {onSwitchToPlayer && (
             <button
@@ -568,7 +559,8 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
               {usersData?.items?.map((u: any) => {
                 const isSuspended = u.status === "SUSPENDED";
-                const isAdmin = u.role === "ADMIN";
+                const isAdmin = u.role === "ADMIN" || u.role === "SUPERADMIN";
+                const isSuper = u.role === "SUPERADMIN";
                 const totalBal = Number(u.wallet?.playBalance || 0) + Number(u.wallet?.mainBalance || 0);
                 const ticketCount = u._count?.tickets ?? 0;
                 const txCount = u._count?.transactions ?? 0;
@@ -589,7 +581,7 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
                         <div className="flex gap-1">
                           <span
                             className={`text-[10px] px-2 py-0.5 rounded-md font-bold ${
-                              isAdmin ? "bg-[#22D3EE]/20 text-[#22D3EE]" : "bg-white/10 text-slate-400"
+                              isSuper ? "bg-amber-500/20 text-amber-400" : isAdmin ? "bg-[#22D3EE]/20 text-[#22D3EE]" : "bg-white/10 text-slate-400"
                             }`}
                           >
                             {u.role}
@@ -632,18 +624,20 @@ export default function AdminDashboard({ onSwitchToPlayer }: { onSwitchToPlayer?
                     </div>
 
                     <div className="pt-2 border-t border-white/10 flex items-center justify-end gap-2">
-                      <button
-                        onClick={() => handleToggleRole(u.id, u.role)}
-                        disabled={updateUserRole.isPending}
-                        className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
-                          isAdmin
-                            ? "bg-[#22D3EE]/20 text-[#22D3EE] hover:bg-[#22D3EE]/30"
-                            : "bg-[#C084FC]/20 text-[#C084FC] hover:bg-[#C084FC]/30"
-                        }`}
-                      >
-                        <UserCog size={14} />
-                        {isAdmin ? "Demote" : "Promote"}
-                      </button>
+                      {currentUser?.role === "SUPERADMIN" && (
+                        <button
+                          onClick={() => handleToggleRole(u.id, u.role)}
+                          disabled={updateUserRole.isPending}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all ${
+                            isAdmin
+                              ? "bg-[#22D3EE]/20 text-[#22D3EE] hover:bg-[#22D3EE]/30"
+                              : "bg-[#C084FC]/20 text-[#C084FC] hover:bg-[#C084FC]/30"
+                          }`}
+                        >
+                          <UserCog size={14} />
+                          {isAdmin ? "Demote" : "Promote"}
+                        </button>
+                      )}
 
                       <button
                         onClick={() => handleToggleStatus(u.id, u.status)}

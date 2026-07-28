@@ -26,7 +26,7 @@ export const adminApi = {
     const res = await api.patch(`/admin/users/${userId}/status`, { status });
     return res.data.data;
   },
-  updateUserRole: async (userId: string, role: "USER" | "ADMIN") => {
+  updateUserRole: async (userId: string, role: "USER" | "ADMIN" | "SUPERADMIN") => {
     await ensureAuth("ADMIN");
     const res = await api.patch(`/admin/users/${userId}/role`, { role });
     return res.data.data;

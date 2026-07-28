@@ -10,7 +10,7 @@ export interface AuthUser {
   username?: string;
   firstName?: string;
   lastName?: string;
-  role: "USER" | "ADMIN";
+  role: "USER" | "ADMIN" | "SUPERADMIN";
 }
 
 interface AppState {

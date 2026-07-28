@@ -42,7 +42,7 @@ export function useUpdateUserStatus() {
 export function useUpdateUserRole() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({ userId, role }: { userId: string; role: "USER" | "ADMIN" }) =>
+    mutationFn: ({ userId, role }: { userId: string; role: "USER" | "ADMIN" | "SUPERADMIN" }) =>
       adminApi.updateUserRole(userId, role),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["adminUsers"] }),
   });
