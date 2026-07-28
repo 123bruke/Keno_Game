@@ -1,23 +1,19 @@
-import { useState } from "react";
+import { Trophy, X } from "lucide-react";
 import { useHistory } from "../lib/hooks";
-import { ChevronLeft, ChevronRight, Trophy, X, Calendar } from "lucide-react";
 
 export default function History() {
-  const [page, setPage] = useState(1);
-  const { data, isLoading } = useHistory(page, 10);
+  const { data, isLoading } = useHistory(1, 10);
 
   if (isLoading) {
     return <div className="text-center py-12 text-slate-400">Loading history...</div>;
   }
 
   const tickets = data?.items || data?.history || [];
-  const total = data?.total || data?.totalGames || 0;
-  const totalPages = data?.totalPages || Math.ceil(total / 10) || 1;
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        {tickets.map((t: any) => {
+        {tickets.slice(0, 10).map((t: any) => {
           const isWin = t.status === "WON" || t.status === "won" || Number(t.payout) > 0;
           const selected = t.selectedNumbers as number[];
           const betAmount = Number(t.betAmount);
@@ -62,28 +58,6 @@ export default function History() {
 
       {tickets.length === 0 && (
         <div className="text-center py-12 text-slate-400">No tickets played yet. Start playing!</div>
-      )}
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-3 pt-2">
-          <button
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-            className="p-2 rounded-lg bg-[#12121c] text-slate-400 hover:text-white disabled:opacity-30"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <span className="text-xs text-slate-400">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page >= totalPages}
-            className="p-2 rounded-lg bg-[#12121c] text-slate-400 hover:text-white disabled:opacity-30"
-          >
-            <ChevronRight size={16} />
-          </button>
-        </div>
       )}
     </div>
   );
