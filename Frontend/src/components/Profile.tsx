@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useAppStore } from "../lib/store";
+import { playSound } from "../lib/sound";
 import { useWallet, useHistory } from "../lib/hooks";
 import {
   User,
@@ -107,7 +108,7 @@ export default function Profile() {
             <span>{language === "am" ? "የኪስ ቦርሳ ሁኔታ" : "Wallet Balances"}</span>
           </div>
           <button
-            onClick={() => setActiveTab("wallet")}
+            onClick={() => { playSound(); setActiveTab("wallet"); }}
             className="text-xs text-[#22D3EE] font-bold flex items-center gap-1 hover:underline"
           >
             {language === "am" ? "ዝርዝር ይመልከቱ" : "Manage Wallet"} <ChevronRight size={14} />
@@ -150,7 +151,7 @@ export default function Profile() {
 
           <div className="flex bg-[#000000] p-1 rounded-xl border border-white/10 text-xs">
             <button
-              onClick={() => setLanguage("am")}
+              onClick={() => { playSound('select'); setLanguage("am"); }}
               className={`px-3 py-1 rounded-lg font-bold transition-all ${
                 language === "am"
                   ? "bg-[#C084FC] text-black shadow-md shadow-[#C084FC]/30"
@@ -160,7 +161,7 @@ export default function Profile() {
               🇪🇹 አማርኛ
             </button>
             <button
-              onClick={() => setLanguage("en")}
+              onClick={() => { playSound('select'); setLanguage("en"); }}
               className={`px-3 py-1 rounded-lg font-bold transition-all ${
                 language === "en"
                   ? "bg-[#22D3EE] text-black shadow-md shadow-[#22D3EE]/30"
@@ -195,7 +196,7 @@ export default function Profile() {
           </div>
 
           <button
-            onClick={toggleSound}
+            onClick={() => { playSound(); toggleSound(); }}
             className={`w-12 h-6 rounded-full transition-colors p-1 flex items-center ${
               soundEnabled ? "bg-[#C084FC] justify-end" : "bg-[#12121c] justify-start border border-white/10"
             }`}
@@ -223,7 +224,7 @@ export default function Profile() {
           </div>
 
           <button
-            onClick={toggleVibration}
+            onClick={() => { playSound(); toggleVibration(); }}
             className={`w-12 h-6 rounded-full transition-colors p-1 flex items-center ${
               vibrationEnabled ? "bg-[#22D3EE] justify-end" : "bg-[#12121c] justify-start border border-white/10"
             }`}
@@ -253,7 +254,7 @@ export default function Profile() {
             className="flex-1 px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white font-mono text-xs focus:outline-none focus:border-[#C084FC]"
           />
           <button
-            onClick={handleGenerateRandomSeed}
+            onClick={() => { playSound(); handleGenerateRandomSeed(); }}
             className="p-2 rounded-lg bg-[#12121c] text-[#22D3EE] hover:bg-[#1a1a2e] border border-white/10"
             title="Generate Random Seed"
           >
@@ -268,7 +269,7 @@ export default function Profile() {
         )}
 
         <button
-          onClick={handleSaveSeed}
+          onClick={() => { playSound('success'); handleSaveSeed(); }}
           className="w-full py-2 rounded-xl bg-[#22D3EE] text-black font-bold text-xs hover:opacity-90 transition-all"
         >
           {language === "am" ? "ሴድ አስቀምጥ" : "Save Custom Client Seed"}
@@ -301,7 +302,7 @@ export default function Profile() {
       {/* 6. HELP, RULES & DEV AUTH SHORTCUT */}
       <div className="glass-card rounded-2xl p-4 space-y-2 border border-white/10">
         <button
-          onClick={() => setShowHowToPlay(!showHowToPlay)}
+          onClick={() => { playSound(); setShowHowToPlay(!showHowToPlay); }}
           className="w-full flex items-center justify-between p-2 rounded-xl bg-[#12121c] hover:bg-[#1a1a2e] text-xs font-bold text-slate-200 transition-all"
         >
           <span className="flex items-center gap-2">

@@ -1,4 +1,5 @@
 import { useAppStore } from "../lib/store";
+import { playSound } from "../lib/sound";
 import { useWallet, useCurrentRound } from "../lib/hooks";
 import { Zap, Clock, Flame, Wallet as WalletIcon, ArrowRight } from "lucide-react";
 
@@ -59,7 +60,7 @@ export default function Home() {
         <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">Select Game Mode</div>
         <div className="grid grid-cols-2 gap-2">
           <div
-            onClick={() => setGameMode("INSTANT")}
+            onClick={() => { playSound('select'); setGameMode("INSTANT"); }}
             className={`cursor-pointer glass-card rounded-2xl p-4 border transition-all ${
               gameMode === "INSTANT"
                 ? "border-[#C084FC] bg-[#C084FC]/10 shadow-lg shadow-[#C084FC]/20"
@@ -74,7 +75,7 @@ export default function Home() {
           </div>
 
           <div
-            onClick={() => setGameMode("CLASSIC")}
+            onClick={() => { playSound('select'); setGameMode("CLASSIC"); }}
             className={`cursor-pointer glass-card rounded-2xl p-4 border transition-all ${
               gameMode === "CLASSIC"
                 ? "border-[#22D3EE] bg-[#22D3EE]/10 shadow-lg shadow-[#22D3EE]/20"
@@ -100,7 +101,7 @@ export default function Home() {
           {PRESETS.map((p) => (
             <button
               key={p}
-              onClick={() => setBetAmount(p)}
+              onClick={() => { playSound(); setBetAmount(p); }}
               className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                 betAmount === p
                   ? "bg-gradient-to-r from-[#C084FC] to-[#22D3EE] text-black"
@@ -129,7 +130,7 @@ export default function Home() {
 
       {/* Main Redirect to Game CTA Button */}
       <button
-        onClick={handleEnterGame}
+        onClick={() => { playSound('success'); handleEnterGame(); }}
         className="w-full py-4 rounded-2xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-black text-lg shadow-2xl shadow-[#C084FC]/30 transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2"
       >
         <Flame size={22} className="fill-black" />

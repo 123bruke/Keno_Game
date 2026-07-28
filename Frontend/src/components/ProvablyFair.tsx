@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useVerify, useCurrentRound, useSettledGames, useProvablyFair } from "../lib/hooks";
+import { playSound } from "../lib/sound";
 import { ShieldCheck, CheckCircle2, RotateCcw } from "lucide-react";
 
 export default function ProvablyFair() {
@@ -84,7 +85,7 @@ export default function ProvablyFair() {
             {settledGames.map((game: any) => (
               <button
                 key={game.id}
-                onClick={() => handleSelectSettled(game.id)}
+                onClick={() => { playSound(); handleSelectSettled(game.id); }}
                 className={`w-full text-left px-3 py-2 rounded-xl border text-xs transition-all ${
                   selectedGameId === game.id
                     ? "border-[#C084FC] bg-[#C084FC]/10"
@@ -109,13 +110,13 @@ export default function ProvablyFair() {
               <span className="text-slate-200 font-semibold">Revealed Data</span>
               <div className="flex gap-2">
                 <button
-                  onClick={handleReset}
+                  onClick={() => { playSound(); handleReset(); }}
                   className="text-[10px] text-slate-400 hover:text-white underline"
                 >
                   Clear
                 </button>
                 <button
-                  onClick={handleAutoVerify}
+                  onClick={() => { playSound('select'); handleAutoVerify(); }}
                   disabled={verify.isPending}
                   className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-bold hover:bg-emerald-500/30 disabled:opacity-50 transition-all"
                 >
@@ -163,7 +164,7 @@ export default function ProvablyFair() {
 
         <div className="flex gap-2">
           <button
-            onClick={() => verify.mutate({ serverSeed, clientSeed, nonce })}
+            onClick={() => { playSound('select'); verify.mutate({ serverSeed, clientSeed, nonce }); }}
             disabled={verify.isPending || !serverSeed || !clientSeed}
             className="flex-1 py-2.5 rounded-xl bg-[#22D3EE] text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all"
           >
@@ -171,7 +172,7 @@ export default function ProvablyFair() {
           </button>
           {(verify.data || verify.isError) && (
             <button
-              onClick={handleReset}
+              onClick={() => { playSound(); handleReset(); }}
               className="px-3 py-2.5 rounded-xl bg-white/5 text-slate-400 text-sm hover:bg-white/10 transition-all"
             >
               Clear

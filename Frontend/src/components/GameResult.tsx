@@ -1,4 +1,5 @@
 import { Trophy, X, Sparkles } from "lucide-react";
+import { playSound } from "../lib/sound";
 
 export default function GameResult({
   result,
@@ -47,7 +48,7 @@ export default function GameResult({
             </div>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => { playSound(); onClose(); }}
             className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white"
           >
             ✕
@@ -110,7 +111,7 @@ export default function GameResult({
         </div>
 
         <button
-          onClick={onClose}
+          onClick={() => { playSound('success'); onClose(); }}
           className="w-full py-3 rounded-xl bg-[#12121c] hover:bg-[#1a1a2e] text-white font-bold text-sm border border-white/10 transition-all"
         >
           Close & Play Again
