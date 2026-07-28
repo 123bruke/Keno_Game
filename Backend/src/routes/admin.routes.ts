@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AdminController } from "../controllers/admin.controller";
-import { authenticateAdmin } from "../middleware/auth.middleware";
+import { authenticateAdmin, authenticateSuperAdmin } from "../middleware/auth.middleware";
 
 const router = Router();
 const controller = new AdminController();
@@ -14,7 +14,7 @@ router.get("/analytics", controller.getFinancialAnalytics);
 
 router.get("/users", controller.getUsers);
 router.patch("/users/:id/status", controller.updateUserStatus);
-router.patch("/users/:id/role", controller.updateUserRole);
+router.patch("/users/:id/role", authenticateSuperAdmin, controller.updateUserRole);
 
 router.get("/reports", controller.getReports);
 

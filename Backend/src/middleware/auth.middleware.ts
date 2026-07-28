@@ -39,8 +39,17 @@ export function authenticate(req: Request, res: Response, next: NextFunction) {
 
 export function authenticateAdmin(req: Request, res: Response, next: NextFunction) {
   authenticate(req, res, () => {
-    if (req.user?.role !== Role.ADMIN) {
+    if (req.user?.role !== Role.ADMIN && req.user?.role !== Role.SUPERADMIN) {
       return error(res, "Forbidden - Admin access required", 403);
+    }
+    next();
+  });
+}
+
+export function authenticateSuperAdmin(req: Request, res: Response, next: NextFunction) {
+  authenticate(req, res, () => {
+    if (req.user?.role !== Role.SUPERADMIN) {
+      return error(res, "Forbidden - SuperAdmin access required", 403);
     }
     next();
   });

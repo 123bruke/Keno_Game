@@ -38,6 +38,13 @@ export function useWithdraw() {
   });
 }
 
+export function useTransactions(page = 1, limit = 10) {
+  return useQuery({
+    queryKey: ["transactions", page, limit],
+    queryFn: () => walletApi.transactions(page, limit),
+  });
+}
+
 export function useCurrentRound() {
   return useQuery({
     queryKey: ["currentRound"],
@@ -79,10 +86,11 @@ export function useHistory(page = 1, limit = 10) {
   });
 }
 
-export function useProvablyFair(gameId?: string) {
+export function useProvablyFair(gameId?: string, opts?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["provablyFair", gameId],
     queryFn: () => gameApi.provablyFair(gameId),
+    enabled: opts?.enabled ?? true,
   });
 }
 

@@ -1,13 +1,9 @@
-import { useState } from "react";
-import { useWallet, useDeposit, useWithdraw } from "../lib/hooks";
-import { Wallet as WalletIcon, ArrowDownCircle, ArrowUpCircle, History } from "lucide-react";
+import { useWallet, useTransactions } from "../lib/hooks";
+import { Wallet as WalletIcon, History } from "lucide-react";
 
 export default function Wallet() {
   const { data: wallet, isLoading } = useWallet();
-  const deposit = useDeposit();
-  const withdraw = useWithdraw();
-  const [depositAmount, setDepositAmount] = useState(100);
-  const [withdrawAmount, setWithdrawAmount] = useState(50);
+  const { data: txData } = useTransactions(1, 10);
 
   if (isLoading) {
     return <div className="text-center py-12 text-slate-400">Loading wallet info...</div>;
@@ -16,6 +12,8 @@ export default function Wallet() {
   const totalBal = Number(wallet?.totalBalance || 0);
   const playBal = Number(wallet?.playBalance || 0);
   const mainBal = Number(wallet?.mainBalance || 0);
+
+  const transactions = Array.isArray(txData) ? txData : (txData as any)?.items ?? [];
 
   return (
     <div className="space-y-4">
@@ -44,64 +42,45 @@ export default function Wallet() {
         </div>
       </div>
 
-      {/* Deposit Form */}
-      <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
-        <div className="flex items-center gap-2 font-bold text-sm text-slate-200">
-          <ArrowDownCircle className="text-emerald-400" size={18} />
-          <span>Deposit Play Balance</span>
+      {/* Recent Transactions */}
+      <div className="glass-card rounded-2xl p-4 border border-white/10">
+        <div className="flex items-center gap-2 mb-3 font-bold text-sm text-slate-200">
+          <History size={18} className="text-[#C084FC]" />
+          <span>Recent Transactions</span>
         </div>
-        <div className="flex gap-2">
-          {[50, 100, 500, 1000].map((preset) => (
-            <button
-              key={preset}
-              onClick={() => setDepositAmount(preset)}
-              className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                depositAmount === preset
-                  ? "bg-[#C084FC] text-black"
-                  : "bg-[#12121c] text-slate-300 hover:bg-[#1a1a2e]"
-              }`}
-            >
-              +{preset}
-            </button>
-          ))}
-        </div>
-        <input
-          type="number"
-          min={1}
-          value={depositAmount}
-          onChange={(e) => setDepositAmount(Math.max(1, Number(e.target.value)))}
-          className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white text-sm focus:outline-none focus:border-[#C084FC]"
-        />
-        <button
-          onClick={() => deposit.mutate({ amount: depositAmount })}
-          disabled={deposit.isPending}
-          className="w-full py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-        >
-          {deposit.isPending ? "Depositing..." : "Deposit Now"}
-        </button>
-      </div>
-
-      {/* Withdraw Form */}
-      <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
-        <div className="flex items-center gap-2 font-bold text-sm text-slate-200">
-          <ArrowUpCircle className="text-[#22D3EE]" size={18} />
-          <span>Withdraw Main Balance</span>
-        </div>
-        <input
-          type="number"
-          min={1}
-          max={mainBal}
-          value={withdrawAmount}
-          onChange={(e) => setWithdrawAmount(Math.max(1, Number(e.target.value)))}
-          className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white text-sm focus:outline-none focus:border-[#22D3EE]"
-        />
-        <button
-          onClick={() => withdraw.mutate({ amount: withdrawAmount })}
-          disabled={withdraw.isPending || mainBal < withdrawAmount}
-          className="w-full py-2.5 rounded-xl bg-[#22D3EE] text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
-        >
-          {withdraw.isPending ? "Withdrawing..." : "Withdraw Funds"}
-        </button>
+        {transactions.length === 0 ? (
+          <p className="text-xs text-slate-500 text-center py-6">No transactions yet</p>
+        ) : (
+          <div className="space-y-2">
+            {transactions.slice(0, 10).map((tx: any, i: number) => {
+              const isCredit = ["DEPOSIT", "WIN", "REFUND", "TRANSFER", "REFERRAL"].includes(tx.type);
+              const label = tx.type === "DEPOSIT" ? "Deposit"
+                : tx.type === "WITHDRAW" ? "Withdraw"
+                : tx.type === "BET" ? "Bet"
+                : tx.type === "WIN" ? "Win"
+                : tx.type === "REFUND" ? "Refund"
+                : tx.type ?? tx.description ?? "Transaction";
+              return (
+                <div
+                  key={tx.id ?? i}
+                  className="flex items-center justify-between py-2 px-3 rounded-xl bg-[#12121c] border border-white/5"
+                >
+                  <div>
+                    <div className="text-xs font-bold text-slate-200">{label}</div>
+                    <div className="text-[10px] text-slate-500">
+                      {tx.createdAt ? new Date(tx.createdAt).toLocaleDateString() : ""}
+                    </div>
+                  </div>
+                  <div
+                    className={`text-xs font-bold ${isCredit ? "text-emerald-400" : "text-rose-400"}`}
+                  >
+                    {isCredit ? "+" : "-"}{Number(tx.amount).toFixed(2)} ETB
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

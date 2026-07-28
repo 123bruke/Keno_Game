@@ -153,6 +153,7 @@ model GameSettings {
 enum Role {
   USER
   ADMIN
+  SUPERADMIN
 }
 
 enum UserStatus {
