@@ -31,6 +31,7 @@ export default function BetControls({
     betAmount,
     gameMode,
     setGameMode,
+    language,
   } = useAppStore();
   const { data: wallet } = useWallet();
   const quickPickMutation = useQuickPick();
@@ -66,7 +67,7 @@ export default function BetControls({
           }`}
         >
           <Zap size={14} />
-          Instant Keno
+          {language === "am" ? "ፈጣን ኬኖ" : "Instant Keno"}
         </button>
         <button
           onClick={() => { playSound('select'); setGameMode("CLASSIC"); }}
@@ -77,7 +78,7 @@ export default function BetControls({
           }`}
         >
           <Clock size={14} />
-          Classic Round
+          {language === "am" ? "ክላሲክ ዙር" : "Classic Round"}
         </button>
       </div>
 
@@ -85,8 +86,8 @@ export default function BetControls({
       {count > 0 && (
         <div className="glass-card rounded-xl p-2.5 border border-white/10">
           <div className="text-[11px] text-slate-400 mb-1.5 flex justify-between items-center">
-            <span>Payout Multipliers ({count} selected)</span>
-            <span className="text-[#C084FC] font-semibold">Max {(Math.max(...Object.values(multiplierTable), 0))}x</span>
+            <span>{language === "am" ? `የክፍያ ማባዣ (${count} ተመርጧል)` : `Payout Multipliers (${count} selected)`}</span>
+            <span className="text-[#C084FC] font-semibold">{language === "am" ? "ከፍተኛ" : "Max"} {(Math.max(...Object.values(multiplierTable), 0))}x</span>
           </div>
           <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {Object.entries(multiplierTable).map(([hit, mult]) => (
@@ -94,7 +95,7 @@ export default function BetControls({
                 key={hit}
                 className="flex-1 min-w-[50px] bg-[#12121c] rounded-lg p-1.5 text-center border border-white/5"
               >
-                <div className="text-[10px] text-slate-400">{hit} Hits</div>
+                <div className="text-[10px] text-slate-400">{hit} {language === "am" ? "ግጥሚያ" : "Hits"}</div>
                 <div className="text-xs font-bold text-[#22D3EE]">{mult}x</div>
               </div>
             ))}
@@ -105,14 +106,14 @@ export default function BetControls({
       {/* Quick Pick & Selection Helpers */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1">
-          <span className="text-xs text-slate-400">Quick Pick:</span>
+          <span className="text-xs text-slate-400">{language === "am" ? "ፈጣን ምርጫ:" : "Quick Pick:"}</span>
           {[3, 5, 7, 10].map((n) => (
             <button
               key={n}
               onClick={() => { playSound(); handleQuickPick(n); }}
               className="px-2 py-1 rounded-md bg-[#12121c] border border-white/10 text-xs font-bold text-[#C084FC] hover:bg-[#C084FC] hover:text-black transition-all"
             >
-              Pick {n}
+              {language === "am" ? `${n} ምረጥ` : `Pick ${n}`}
             </button>
           ))}
         </div>
@@ -120,15 +121,15 @@ export default function BetControls({
           onClick={() => { playSound(); clearSelection(); }}
           disabled={selectedNumbers.length === 0}
           className="p-1.5 rounded-md bg-rose-500/10 text-rose-400 hover:bg-rose-500/20 disabled:opacity-30 text-xs font-bold flex items-center gap-1"
-          title="Clear Selection"
+          title={language === "am" ? "ምርጫ አጽዳ" : "Clear Selection"}
         >
-          <Trash2 size={14} /> Clear
+          <Trash2 size={14} /> {language === "am" ? "አጽዳ" : "Clear"}
         </button>
       </div>
 
       {/* Active Wager Info Badge */}
       <div className="flex justify-between items-center text-xs text-slate-400 bg-[#09090b] px-3 py-2 rounded-xl border border-white/10">
-        <span>Active Wager (set in Home):</span>
+        <span>{language === "am" ? "ንቁ ውርርድ (በመነሻ ገጽ የተዘጋጀ):" : "Active Wager (set in Home):"}</span>
         <span className="font-extrabold text-[#22D3EE] font-mono">{betAmount} ETB</span>
       </div>
 
@@ -140,10 +141,10 @@ export default function BetControls({
       >
         <Flame size={20} className="fill-black" />
         {isPlaying
-          ? "Drawing Numbers..."
+          ? (language === "am" ? "ቁጥሮች እየወጡ ነው..." : "Drawing Numbers...")
           : gameMode === "INSTANT"
-          ? `Play Instant (${count} numbers @ ${betAmount} ETB)`
-          : `Queue Classic Ticket (${count} numbers @ ${betAmount} ETB)`}
+          ? (language === "am" ? `ፈጣን ተጫወት (${count} ቁጥሮች @ ${betAmount} ETB)` : `Play Instant (${count} numbers @ ${betAmount} ETB)`)
+          : (language === "am" ? `የክላሲክ ትኬት አስገባ (${count} ቁጥሮች @ ${betAmount} ETB)` : `Queue Classic Ticket (${count} numbers @ ${betAmount} ETB)`)}
       </button>
     </div>
   );

@@ -1,11 +1,13 @@
 import { Trophy, X } from "lucide-react";
 import { useHistory } from "../lib/hooks";
+import { useAppStore } from "../lib/store";
 
 export default function History() {
+  const { language } = useAppStore();
   const { data, isLoading } = useHistory(1, 10);
 
   if (isLoading) {
-    return <div className="text-center py-12 text-slate-400">Loading history...</div>;
+    return <div className="text-center py-12 text-slate-400">{language === "am" ? "ታሪክ በመጫን ላይ..." : "Loading history..."}</div>;
   }
 
   const tickets = data?.items || data?.history || [];
@@ -35,7 +37,7 @@ export default function History() {
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center text-xs">
                   <span className="font-bold text-slate-200">
-                    Round #{t.game?.roundNumber || t.roundNumber || "N/A"}
+                    {language === "am" ? "ዙር" : "Round"} #{t.game?.roundNumber || t.roundNumber || "N/A"}
                   </span>
                   <span className={`font-mono font-extrabold ${isWin ? "text-emerald-400" : "text-rose-400"}`}>
                     {isWin ? `+${payout.toFixed(2)} ETB` : `-${betAmount.toFixed(2)} ETB`}
@@ -43,12 +45,12 @@ export default function History() {
                 </div>
 
                 <div className="flex justify-between text-[11px] text-slate-400 mt-1">
-                  <span>Matches: {t.matches ?? 0}/{selected?.length ?? 0}</span>
+                  <span>{language === "am" ? "ግጥሚያ:" : "Matches:"} {t.matches ?? 0}/{selected?.length ?? 0}</span>
                   <span className="text-[#22D3EE] font-bold">{t.multiplier ?? 0}x</span>
                 </div>
 
                 <div className="text-[10px] font-mono text-[#C084FC] mt-1 truncate">
-                  Picks: {selected?.join(", ")}
+                  {language === "am" ? "ምርጫዎች:" : "Picks:"} {selected?.join(", ")}
                 </div>
               </div>
             </div>
@@ -57,7 +59,7 @@ export default function History() {
       </div>
 
       {tickets.length === 0 && (
-        <div className="text-center py-12 text-slate-400">No tickets played yet. Start playing!</div>
+        <div className="text-center py-12 text-slate-400">{language === "am" ? "እስካሁን ትኬት አልተጫወቱም። ይጀምሩ!" : "No tickets played yet. Start playing!"}</div>
       )}
     </div>
   );
