@@ -18,44 +18,66 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+const saveAuth = (data: { token: string; user: any }) => {
+  localStorage.setItem("keno_token", data.token);
+  if (data.user) {
+    localStorage.setItem("keno_user", JSON.stringify(data.user));
+  }
+};
+
 export const authApi = {
   loginTelegram: async (data: {
     telegramId: number | string;
     username?: string;
     firstName?: string;
     lastName?: string;
-    role?: "USER" | "ADMIN";
   }) => {
     const res = await axios.post(`${API_BASE}/auth/telegram`, {
       telegramId: Number(data.telegramId),
       username: data.username || undefined,
       firstName: data.firstName || undefined,
       lastName: data.lastName || undefined,
-      role: data.role || "USER",
     });
 
     if (res.data.success && res.data.data.token) {
-      localStorage.setItem("keno_token", res.data.data.token);
-      if (res.data.data.user) {
-        localStorage.setItem("keno_user", JSON.stringify(res.data.data.user));
-      }
+      saveAuth(res.data.data);
+    }
+    return res.data.data;
+  },
+
+  loginDev: async (data: {
+    telegramId?: number | string;
+    username?: string;
+    firstName?: string;
+    role?: "USER" | "ADMIN" | "SUPERADMIN";
+  }) => {
+    const res = await axios.post(`${API_BASE}/auth/dev-login`, data);
+
+    if (res.data.success && res.data.data.token) {
+      saveAuth(res.data.data);
     }
     return res.data.data;
   },
 };
 
 // Auto authentication helper
-export async function ensureAuth(role: "USER" | "ADMIN" = "USER") {
+export async function ensureAuth(role: "USER" | "ADMIN" | "SUPERADMIN" = "USER") {
   const existingToken = localStorage.getItem("keno_token");
   if (existingToken) return existingToken;
 
   try {
+    if (role === "ADMIN") {
+      return (await authApi.loginDev({
+        username: "admin_keno",
+        firstName: "Admin",
+        role: "ADMIN",
+      })).token;
+    }
     return (await authApi.loginTelegram({
-      telegramId: role === "ADMIN" ? 999999999 : 123456789,
-      username: role === "ADMIN" ? "admin_keno" : "player_one",
-      firstName: role === "ADMIN" ? "Admin" : "Player",
-      lastName: role === "ADMIN" ? "Manager" : "One",
-      role,
+      telegramId: 123456789,
+      username: "player_one",
+      firstName: "Player",
+      lastName: "One",
     })).token;
   } catch (err) {
     console.error("Auto auth failed:", err);
@@ -121,6 +143,8 @@ export interface CurrentRound {
   status: string;
   startedAt: string;
   serverSeedHash?: string;
+  clientSeed?: string;
+  nonce?: number;
 }
 
 export interface ProvablyFairInfo {

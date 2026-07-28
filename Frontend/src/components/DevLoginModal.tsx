@@ -2,45 +2,46 @@ import { useState } from "react";
 import { authApi } from "../lib/api";
 import { useAppStore } from "../lib/store";
 import { useQueryClient } from "@tanstack/react-query";
-import { UserCheck, Shield, KeyRound, X, Sparkles } from "lucide-react";
+import { UserCheck, Shield, KeyRound, X } from "lucide-react";
 
 export default function DevLoginModal({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const { setCurrentUser, setActiveTab } = useAppStore();
 
-  const [telegramId, setTelegramId] = useState("123456789");
+  const [telegramId, setTelegramId] = useState("");
   const [username, setUsername] = useState("player_one");
   const [firstName, setFirstName] = useState("Player");
-  const [lastName, setLastName] = useState("One");
-  const [role, setRole] = useState<"USER" | "ADMIN">("USER");
+  const [role, setRole] = useState<"USER" | "ADMIN" | "SUPERADMIN">("USER");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleLogin = async (
     customId?: string,
     customUser?: string,
-    customRole?: "USER" | "ADMIN"
+    customRole?: "USER" | "ADMIN" | "SUPERADMIN"
   ) => {
     setLoading(true);
     setErrorMsg("");
 
     try {
+      const id = customId || telegramId;
       const payload = {
-        telegramId: customId || telegramId,
+        ...(id ? { telegramId: id } : {}),
         username: customUser || username,
         firstName,
-        lastName,
-        role: customRole || role,
+        ...(id ? {} : { role: customRole || role }),
       };
 
-      const res = await authApi.loginTelegram(payload);
+      const res = id
+        ? await authApi.loginTelegram({ telegramId: id, username: customUser || username, firstName })
+        : await authApi.loginDev(payload);
       setCurrentUser(res.user);
 
       // Refresh query data with new auth token
       qc.invalidateQueries();
 
-      // Role-based redirect: ADMIN → admin dashboard, USER → home
-      setActiveTab((customRole || role) === "ADMIN" ? "admin" : "home");
+      // Role-based redirect: ADMIN/SUPERADMIN → admin dashboard, USER → home
+      setActiveTab(res.user.role === "ADMIN" || res.user.role === "SUPERADMIN" ? "admin" : "home");
 
       onClose();
     } catch (err: any) {
@@ -61,7 +62,7 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
             </div>
             <div>
               <h3 className="text-base font-extrabold text-white">Dev / Admin Login</h3>
-              <p className="text-[11px] text-slate-400">Authenticates with POST /auth/telegram</p>
+              <p className="text-[11px] text-slate-400">Dev login — Telegram ID or new user</p>
             </div>
           </div>
           <button
@@ -97,16 +98,16 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
 
         <div className="relative flex items-center my-2">
           <div className="flex-grow border-t border-white/10" />
-          <span className="flex-shrink mx-2 text-[10px] text-slate-500 uppercase">or Custom Telegram User</span>
+          <span className="flex-shrink mx-2 text-[10px] text-slate-500 uppercase">or Custom</span>
           <div className="flex-grow border-t border-white/10" />
         </div>
 
         {/* Custom Login Form */}
         <div className="space-y-3 text-xs">
           <div>
-            <label className="text-slate-400 block mb-1">Telegram ID (Number)</label>
+            <label className="text-slate-400 block mb-1">Telegram ID <span className="text-slate-500">(blank = new dev user)</span></label>
             <input
-              type="number"
+              type="text"
               value={telegramId}
               onChange={(e) => setTelegramId(e.target.value)}
               className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white font-mono focus:outline-none focus:border-[#C084FC]"
@@ -124,20 +125,6 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
               />
             </div>
             <div>
-              <label className="text-slate-400 block mb-1">Role</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as "USER" | "ADMIN")}
-                className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white focus:outline-none focus:border-[#22D3EE]"
-              >
-                <option value="USER">USER (Player)</option>
-                <option value="ADMIN">ADMIN (Manager)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
               <label className="text-slate-400 block mb-1">First Name</label>
               <input
                 type="text"
@@ -146,15 +133,19 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
                 className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white focus:outline-none focus:border-[#C084FC]"
               />
             </div>
-            <div>
-              <label className="text-slate-400 block mb-1">Last Name</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white focus:outline-none focus:border-[#C084FC]"
-              />
-            </div>
+          </div>
+
+          <div>
+            <label className="text-slate-400 block mb-1">Role <span className="text-slate-500">(only when creating new user)</span></label>
+            <select
+              value={role}
+              onChange={(e) => setRole(e.target.value as "USER" | "ADMIN" | "SUPERADMIN")}
+              className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white focus:outline-none focus:border-[#22D3EE]"
+            >
+              <option value="USER">USER (Player)</option>
+              <option value="ADMIN">ADMIN (Manager)</option>
+              <option value="SUPERADMIN">SUPERADMIN</option>
+            </select>
           </div>
         </div>
 
@@ -166,7 +157,7 @@ export default function DevLoginModal({ onClose }: { onClose: () => void }) {
 
         <button
           onClick={() => handleLogin()}
-          disabled={loading || !telegramId}
+          disabled={loading}
           className="w-full py-3 rounded-xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-extrabold text-xs shadow-lg shadow-[#C084FC]/25 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50"
         >
           {loading ? "Authenticating with Backend..." : "Submit & Authenticate"}
