@@ -133,7 +133,7 @@ function AppContent() {
           </div>
           <div>
             <h1 className="text-base font-extrabold tracking-wide bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-white bg-clip-text text-transparent">
-              KENO CASINO
+              ኬኖ
             </h1>
             <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
               <span>{currentUser?.username ? `@${currentUser.username}` : "Dev User"}</span>
