@@ -193,6 +193,11 @@ export const gameApi = {
     });
     return res.data.data as PlayResponse;
   },
+  settledGames: async () => {
+    await ensureAuth();
+    const res = await api.get("/games/keno/settled-games");
+    return res.data.data;
+  },
   quickPick: async (count = 5) => {
     const res = await api.get("/games/keno/quick-pick", { params: { count } });
     return res.data.data.numbers as number[];

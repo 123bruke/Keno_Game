@@ -32,7 +32,7 @@ export default function Home() {
           <div>
             <div className="text-xs text-slate-400">Welcome Back</div>
             <h2 className="text-lg font-extrabold text-white">
-              @{currentUser?.username || "Keno Player"}
+              {currentUser?.firstName || currentUser?.username || "Keno Player"}
             </h2>
           </div>
           <div className="text-right">

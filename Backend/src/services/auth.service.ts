@@ -50,6 +50,12 @@ export class AuthService {
         lastName: data.lastName,
         role: Role.USER,
       });
+    } else {
+      user = await this.userRepository.updateProfile(user.id, {
+        username: data.username ?? undefined,
+        firstName: data.firstName ?? undefined,
+        lastName: data.lastName ?? undefined,
+      });
     }
 
     const token = JwtService.sign({

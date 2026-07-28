@@ -1,13 +1,43 @@
 import { useState } from "react";
-import { useVerify, useCurrentRound } from "../lib/hooks";
-import { ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
+import { useVerify, useCurrentRound, useSettledGames, useProvablyFair } from "../lib/hooks";
+import { ShieldCheck, CheckCircle2, RotateCcw } from "lucide-react";
 
 export default function ProvablyFair() {
   const { data: round } = useCurrentRound();
+  const { data: settledGames } = useSettledGames();
   const verify = useVerify();
   const [serverSeed, setServerSeed] = useState("");
   const [clientSeed, setClientSeed] = useState("");
   const [nonce, setNonce] = useState(0);
+  const [selectedGameId, setSelectedGameId] = useState<string | undefined>(undefined);
+
+  const { data: selectedRecord } = useProvablyFair(selectedGameId, {
+    enabled: !!selectedGameId,
+  });
+
+  const handleSelectSettled = (gameId: string) => {
+    setSelectedGameId(gameId);
+  };
+
+  const handleAutoVerify = () => {
+    if (!selectedRecord) return;
+    setServerSeed(selectedRecord.serverSeed);
+    setClientSeed(selectedRecord.clientSeed);
+    setNonce(selectedRecord.nonce);
+    verify.mutate({
+      serverSeed: selectedRecord.serverSeed,
+      clientSeed: selectedRecord.clientSeed,
+      nonce: selectedRecord.nonce,
+    });
+  };
+
+  const handleReset = () => {
+    setServerSeed("");
+    setClientSeed("");
+    setNonce(0);
+    setSelectedGameId(undefined);
+    verify.reset();
+  };
 
   if (!round) {
     return <div className="text-center py-12 text-slate-400">Loading transparency info...</div>;
@@ -38,15 +68,75 @@ export default function ProvablyFair() {
             <span className="text-slate-400">Nonce:</span>
             <span className="font-mono text-slate-200">{round?.nonce ?? 0}</span>
           </div>
-
         </div>
+      </div>
+
+      {/* Past Settled Rounds */}
+      <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
+        <div className="flex items-center gap-2 mb-1 text-emerald-400">
+          <RotateCcw size={18} />
+          <h3 className="font-bold text-sm text-white">Past Settled Rounds</h3>
+        </div>
+        {!settledGames || settledGames.length === 0 ? (
+          <p className="text-xs text-slate-400">No settled rounds yet.</p>
+        ) : (
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {settledGames.map((game: any) => (
+              <button
+                key={game.id}
+                onClick={() => handleSelectSettled(game.id)}
+                className={`w-full text-left px-3 py-2 rounded-xl border text-xs transition-all ${
+                  selectedGameId === game.id
+                    ? "border-[#C084FC] bg-[#C084FC]/10"
+                    : "border-white/10 bg-[#000000] hover:border-emerald-500/30"
+                }`}
+              >
+                <div className="flex justify-between items-center">
+                  <span className="text-white font-semibold">Round #{game.roundNumber}</span>
+                  <span className="text-xs text-slate-400">{game.status}</span>
+                </div>
+                <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                  {new Date(game.startedAt).toLocaleString()} | {game.mode}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {selectedRecord && (
+          <div className="bg-[#000000] border border-white/10 rounded-xl p-3 text-xs space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-200 font-semibold">Revealed Data</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleReset}
+                  className="text-[10px] text-slate-400 hover:text-white underline"
+                >
+                  Clear
+                </button>
+                <button
+                  onClick={handleAutoVerify}
+                  disabled={verify.isPending}
+                  className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-bold hover:bg-emerald-500/30 disabled:opacity-50 transition-all"
+                >
+                  {verify.isPending ? "Verifying..." : "Auto Verify"}
+                </button>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <div><span className="text-slate-400">Server Seed:</span> <span className="font-mono text-[10px] text-[#C084FC] break-all">{selectedRecord.serverSeed}</span></div>
+              <div><span className="text-slate-400">Client Seed:</span> <span className="font-mono text-[10px] text-[#22D3EE]">{selectedRecord.clientSeed}</span></div>
+              <div><span className="text-slate-400">Nonce:</span> <span className="font-mono text-slate-200">{selectedRecord.nonce}</span></div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Manual Verification Tool */}
       <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
         <h3 className="font-bold text-sm text-slate-200">Verify Past Draw</h3>
         <p className="text-xs text-slate-400">
-          After a round settles, enter its revealed server seed, client seed, and nonce to verify the draw was fair.
+          Select a settled round above or manually enter the revealed server seed, client seed, and nonce to verify the draw was fair.
         </p>
 
         <input
@@ -71,13 +161,23 @@ export default function ProvablyFair() {
           className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#C084FC]"
         />
 
-        <button
-          onClick={() => verify.mutate({ serverSeed, clientSeed, nonce })}
-          disabled={verify.isPending || !serverSeed || !clientSeed}
-          className="w-full py-2.5 rounded-xl bg-[#22D3EE] text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all"
-        >
-          {verify.isPending ? "Calculating Draw..." : "Verify HMAC-SHA256"}
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => verify.mutate({ serverSeed, clientSeed, nonce })}
+            disabled={verify.isPending || !serverSeed || !clientSeed}
+            className="flex-1 py-2.5 rounded-xl bg-[#22D3EE] text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all"
+          >
+            {verify.isPending ? "Calculating Draw..." : "Verify HMAC-SHA256"}
+          </button>
+          {(verify.data || verify.isError) && (
+            <button
+              onClick={handleReset}
+              className="px-3 py-2.5 rounded-xl bg-white/5 text-slate-400 text-sm hover:bg-white/10 transition-all"
+            >
+              Clear
+            </button>
+          )}
+        </div>
 
         {verify.data && (
           <div className="bg-[#000000] border border-emerald-500/30 rounded-xl p-3 text-xs space-y-2">
@@ -95,6 +195,12 @@ export default function ProvablyFair() {
                 {verify.data.drawNumbers?.join(", ")}
               </div>
             </div>
+          </div>
+        )}
+
+        {verify.isError && (
+          <div className="bg-[#000000] border border-red-500/30 rounded-xl p-3 text-xs text-red-400">
+            Verification failed. Check the seed values.
           </div>
         )}
       </div>

@@ -86,6 +86,14 @@ export function useHistory(page = 1, limit = 10) {
   });
 }
 
+export function useSettledGames() {
+  return useQuery({
+    queryKey: ["settledGames"],
+    queryFn: gameApi.settledGames,
+    refetchInterval: 30000,
+  });
+}
+
 export function useProvablyFair(gameId?: string, opts?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ["provablyFair", gameId],
