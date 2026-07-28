@@ -55,6 +55,21 @@ export class UserRepository {
     });
   }
 
+  async updateProfile(
+    userId: string,
+    data: { username?: string; firstName?: string; lastName?: string }
+  ) {
+    const updateData: any = {};
+    if (data.username !== undefined) updateData.username = data.username;
+    if (data.firstName !== undefined) updateData.firstName = data.firstName;
+    if (data.lastName !== undefined) updateData.lastName = data.lastName;
+    return prisma.user.update({
+      where: { id: userId },
+      data: updateData,
+      include: { wallet: true },
+    });
+  }
+
   async updateStatus(userId: string, status: UserStatus) {
     return prisma.user.update({
       where: { id: userId },

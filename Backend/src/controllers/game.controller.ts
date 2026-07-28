@@ -99,11 +99,28 @@ export class GameController {
       }
 
       if (query.gameId) {
-        const record = await this.fairnessService.getRecord(query.gameId);
-        if (!record) {
-          return res.status(404).json({ success: false, message: "Fairness record not found" });
+        const game = await this.gameService.getById(query.gameId);
+        if (!game) {
+          return res.status(404).json({ success: false, message: "Game not found" });
         }
-        return success(res, record);
+
+        const isSettled = game.status === "COMPLETED" || game.status === "CANCELLED";
+
+        if (isSettled) {
+          const record = await this.fairnessService.getRecord(query.gameId);
+          if (!record) {
+            return res.status(404).json({ success: false, message: "Fairness record not found" });
+          }
+          return success(res, record);
+        }
+
+        const record = await this.fairnessService.getRecord(query.gameId);
+        return success(res, {
+          gameId: query.gameId,
+          serverSeedHash: record?.serverSeedHash,
+          clientSeed: record?.clientSeed,
+          nonce: record?.nonce,
+        });
       }
 
       return res.status(400).json({
@@ -127,6 +144,18 @@ export class GameController {
 
       const numbers = Array.from(picked).sort((a, b) => a - b);
       return success(res, { count, numbers }, "Quick pick generated");
+    } catch (err) {
+      next(err);
+    }
+  };
+
+  getSettledGames = async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const history = await this.gameService.getHistory(1, 10);
+      const settled = history.items.filter(
+        (g: any) => g.status === "COMPLETED" || g.status === "CANCELLED"
+      );
+      return success(res, settled);
     } catch (err) {
       next(err);
     }
