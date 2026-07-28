@@ -10,7 +10,6 @@ import {
   ShieldCheck,
   Wallet as WalletIcon,
   Award,
-  KeyRound,
   HelpCircle,
   ShieldAlert,
   Sparkles,
@@ -30,7 +29,6 @@ export default function Profile() {
     toggleVibration,
     clientSeed,
     setClientSeed,
-    setShowDevLogin,
     setActiveTab,
   } = useAppStore();
 
@@ -82,7 +80,7 @@ export default function Profile() {
               </h2>
               <span
                 className={`text-[9px] px-2 py-0.5 rounded-full font-extrabold ${
-                  currentUser?.role === "ADMIN"
+                  currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN"
                     ? "bg-[#22D3EE]/20 text-[#22D3EE] border border-[#22D3EE]/40"
                     : "bg-[#C084FC]/20 text-[#C084FC] border border-[#C084FC]/40"
                 }`}
@@ -321,16 +319,6 @@ export default function Profile() {
           </div>
         )}
 
-        <button
-          onClick={() => setShowDevLogin(true)}
-          className="w-full flex items-center justify-between p-2 rounded-xl bg-[#12121c] hover:bg-[#1a1a2e] text-xs font-bold text-[#C084FC] transition-all"
-        >
-          <span className="flex items-center gap-2">
-            <KeyRound size={16} />
-            {language === "am" ? "መለያ ቀይር / Dev Login" : "Switch Account / Dev Login"}
-          </span>
-          <ChevronRight size={16} />
-        </button>
       </div>
     </div>
   );

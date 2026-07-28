@@ -13,8 +13,7 @@ import History from "./components/History";
 import ProvablyFair from "./components/ProvablyFair";
 import Profile from "./components/Profile";
 import AdminDashboard from "./features/admin/AdminDashboard";
-import DevLoginModal from "./components/DevLoginModal";
-import { Home as HomeIcon, Clock, WalletIcon, ShieldCheck, User as UserIcon, KeyRound, ArrowLeft } from "lucide-react";
+import { Home as HomeIcon, Clock, WalletIcon, ShieldCheck, User as UserIcon, ArrowLeft } from "lucide-react";
 
 const qc = new QueryClient();
 
@@ -39,8 +38,7 @@ function AppContent() {
     clearSelection,
     currentUser,
     setCurrentUser,
-    showDevLogin,
-    setShowDevLogin,
+
   } = useAppStore();
 
   const playMutation = usePlayKeno();
@@ -58,7 +56,7 @@ function AppContent() {
       try {
         const parsed = JSON.parse(cachedUser);
         setCurrentUser(parsed);
-        setActiveTab(parsed.role === "ADMIN" ? "admin" : "home");
+        setActiveTab(parsed.role === "ADMIN" || parsed.role === "SUPERADMIN" ? "admin" : "home");
       } catch {}
     } else {
       ensureAuth().then(() => {
@@ -66,7 +64,7 @@ function AppContent() {
         if (stored) {
           const parsed = JSON.parse(stored);
           setCurrentUser(parsed);
-          setActiveTab(parsed.role === "ADMIN" ? "admin" : "home");
+          setActiveTab(parsed.role === "ADMIN" || parsed.role === "SUPERADMIN" ? "admin" : "home");
         }
       });
     }
@@ -109,11 +107,10 @@ function AppContent() {
   }
 
   // Role-based guard: admin dashboard only for ADMIN role
-  if (activeTab === "admin" && currentUser?.role === "ADMIN") {
+  if (activeTab === "admin" && (currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN")) {
     return (
       <>
         <AdminDashboard onSwitchToPlayer={() => setActiveTab("home")} />
-        {showDevLogin && <DevLoginModal onClose={() => setShowDevLogin(false)} />}
       </>
     );
   }
@@ -137,9 +134,9 @@ function AppContent() {
             </h1>
             <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
               <span>{currentUser?.username ? `@${currentUser.username}` : "Dev User"}</span>
-              {currentUser?.role === "ADMIN" && (
+              {(currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN") && (
                 <span
-                  onClick={() => setActiveTab("admin")}
+                  onClick={(e) => { e.stopPropagation(); setActiveTab("admin"); }}
                   className="text-[#22D3EE] font-bold underline cursor-pointer"
                 >
                   [ADMIN DASHBOARD]
@@ -150,14 +147,7 @@ function AppContent() {
         </div>
 
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowDevLogin(true)}
-            className="flex items-center gap-1 text-[11px] font-bold text-[#C084FC] bg-[#12121c] px-2.5 py-1 rounded-full border border-[#C084FC]/30 hover:bg-[#C084FC]/20 transition-all"
-            title="Switch User / Dev Login"
-          >
-            <KeyRound size={12} />
-            Dev Auth
-          </button>
+          {/* Dev Auth button removed for production */}
           <span className="text-[11px] font-bold text-[#22D3EE] bg-[#12121c] px-2.5 py-1 rounded-full border border-white/10 font-mono">
             {Number(walletData?.totalBalance || 0).toFixed(0)} ETB
           </span>
@@ -218,7 +208,6 @@ function AppContent() {
       </nav>
 
       {/* Modals */}
-      {showDevLogin && <DevLoginModal onClose={() => setShowDevLogin(false)} />}
       {gameResultData && <GameResult result={gameResultData} onClose={() => setGameResultData(null)} />}
     </div>
   );
