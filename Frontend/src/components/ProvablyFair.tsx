@@ -1,16 +1,16 @@
 import { useState } from "react";
-import { useProvablyFair, useVerify } from "../lib/hooks";
+import { useVerify, useCurrentRound } from "../lib/hooks";
 import { ShieldCheck, CheckCircle2, AlertCircle } from "lucide-react";
 
 export default function ProvablyFair() {
-  const { data: info, isLoading } = useProvablyFair();
+  const { data: round } = useCurrentRound();
   const verify = useVerify();
   const [serverSeed, setServerSeed] = useState("");
   const [clientSeed, setClientSeed] = useState("");
   const [nonce, setNonce] = useState(0);
 
-  if (isLoading) {
-    return <div className="text-center py-12 text-slate-400">Loading Provably Fair info...</div>;
+  if (!round) {
+    return <div className="text-center py-12 text-slate-400">Loading transparency info...</div>;
   }
 
   return (
@@ -24,20 +24,21 @@ export default function ProvablyFair() {
         <div className="space-y-2 text-xs">
           <div className="flex justify-between">
             <span className="text-slate-400">Active Game ID:</span>
-            <span className="font-mono text-slate-300 text-[10px] truncate max-w-[200px]">{info?.gameId || "N/A"}</span>
+            <span className="font-mono text-slate-300 text-[10px] truncate max-w-[200px]">{round?.gameId || "N/A"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Server Seed Hash (SHA256):</span>
-            <span className="font-mono text-[#C084FC] text-[10px] break-all max-w-[200px]">{info?.serverSeedHash || "N/A"}</span>
+            <span className="font-mono text-[#C084FC] text-[10px] break-all max-w-[200px]">{round?.serverSeedHash || "N/A"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Client Seed:</span>
-            <span className="font-mono text-[#22D3EE]">{info?.clientSeed || "N/A"}</span>
+            <span className="font-mono text-[#22D3EE]">{round?.clientSeed || "N/A"}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Nonce:</span>
-            <span className="font-mono text-slate-200">{info?.nonce ?? 0}</span>
+            <span className="font-mono text-slate-200">{round?.nonce ?? 0}</span>
           </div>
+
         </div>
       </div>
 
@@ -45,12 +46,12 @@ export default function ProvablyFair() {
       <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
         <h3 className="font-bold text-sm text-slate-200">Verify Past Draw</h3>
         <p className="text-xs text-slate-400">
-          Input the revealed server seed, client seed, and nonce to deterministically recalculate winning numbers.
+          After a round settles, enter its revealed server seed, client seed, and nonce to verify the draw was fair.
         </p>
 
         <input
           type="text"
-          placeholder="Server Seed (Revealed post-draw)"
+          placeholder="Server Seed (revealed post-draw)"
           value={serverSeed}
           onChange={(e) => setServerSeed(e.target.value)}
           className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#C084FC]"

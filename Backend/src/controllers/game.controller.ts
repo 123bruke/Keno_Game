@@ -3,6 +3,7 @@ import { GameEngineService } from "../services/game.service.engine";
 import { GameService } from "../services/game.service";
 import { TicketService } from "../services/ticket.service";
 import { FairnessService } from "../services/fairness.service";
+import prisma from "../config/prisma";
 import { PlayGameSchema } from "../dtos/game/play-game.dto";
 import { success } from "../utils/response";
 import { z } from "zod";
@@ -37,7 +38,10 @@ export class GameController {
   getCurrentDraw = async (req: Request, res: Response, next: NextFunction) => {
     try {
       const game = await this.gameService.getOrCreateCurrentGame();
-      const fairness = await this.fairnessService.getRecord(game.id);
+      let fairness = await this.fairnessService.getRecord(game.id);
+      if (!fairness) {
+        fairness = await prisma.$transaction((tx) => this.fairnessService.commit(tx, game.id));
+      }
 
       return success(res, {
         gameId: game.id,
@@ -45,7 +49,9 @@ export class GameController {
         mode: game.mode,
         status: game.status,
         startedAt: game.startedAt,
-        serverSeedHash: fairness?.serverSeedHash,
+        serverSeedHash: fairness.serverSeedHash,
+        clientSeed: fairness.clientSeed,
+        nonce: fairness.nonce,
       });
     } catch (err) {
       next(err);
