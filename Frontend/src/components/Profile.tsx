@@ -3,17 +3,10 @@ import { useAppStore } from "../lib/store";
 import { playSound } from "../lib/sound";
 import { useWallet, useHistory } from "../lib/hooks";
 import {
-  User,
-  Volume2,
-  VolumeX,
-  Globe,
-  Smartphone,
+  Settings as SettingsIcon,
   ShieldCheck,
   Wallet as WalletIcon,
   Award,
-  HelpCircle,
-  ShieldAlert,
-  Sparkles,
   ChevronRight,
   CheckCircle2,
   RefreshCw,
@@ -23,11 +16,6 @@ export default function Profile() {
   const {
     currentUser,
     language,
-    setLanguage,
-    soundEnabled,
-    toggleSound,
-    vibrationEnabled,
-    toggleVibration,
     clientSeed,
     setClientSeed,
     setActiveTab,
@@ -36,7 +24,6 @@ export default function Profile() {
   const { data: wallet } = useWallet();
   const { data: historyData } = useHistory(1, 100);
 
-  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [customSeed, setCustomSeed] = useState(clientSeed);
   const [seedSavedMsg, setSeedSavedMsg] = useState("");
 
@@ -73,28 +60,16 @@ export default function Profile() {
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2">
+            <div>
               <h2 className="text-base font-extrabold text-white truncate">
                 {currentUser?.firstName
                   ? `${currentUser.firstName} ${currentUser.lastName || ""}`
                   : `@${currentUser?.username || "keno_player"}`}
               </h2>
-              <span
-                className={`text-[9px] px-2 py-0.5 rounded-full font-extrabold ${
-                  currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN"
-                    ? "bg-[#22D3EE]/20 text-[#22D3EE] border border-[#22D3EE]/40"
-                    : "bg-[#C084FC]/20 text-[#C084FC] border border-[#C084FC]/40"
-                }`}
-              >
-                {currentUser?.role || "USER"}
-              </span>
             </div>
 
-            <div className="text-xs text-slate-400 font-mono mt-0.5">
-              @{currentUser?.username || "player"}
-            </div>
             <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-              ID: {currentUser?.telegramId || "123456789"}
+              Telegram ID: {currentUser?.telegramId || "123456789"}
             </div>
           </div>
         </div>
@@ -131,108 +106,36 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* 3. SETTINGS & PREFERENCES */}
-      <div className="glass-card rounded-2xl p-4 space-y-4 border border-white/10">
-        <h3 className="text-xs font-extrabold text-slate-300 uppercase tracking-wider">
-          {language === "am" ? "የመተግበሪያ ማስተካከያዎች" : "App Preferences & Settings"}
-        </h3>
-
-        {/* Language Switcher */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5 text-xs text-slate-200 font-semibold">
-            <Globe className="text-[#22D3EE]" size={18} />
-            <div>
-              <div>{language === "am" ? "ቋንቋ ይምረጡ" : "Select Language"}</div>
-              <div className="text-[10px] text-slate-400 font-normal">
-                {language === "am" ? "አማርኛ / English" : "Amharic / English"}
+      {/* 3. CAREER PERFORMANCE STATS */}
+      <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+          <Award className="text-[#C084FC]" size={18} />
+          <span>{language === "am" ? "የጨዋታ ታሪክ ስታቲስቲክስ" : "Career Performance Stats"}</span>
               </div>
             </div>
           </div>
-
-          <div className="flex bg-[#000000] p-1 rounded-xl border border-white/10 text-xs">
-            <button
-              onClick={() => { playSound('select'); setLanguage("am"); }}
-              className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                language === "am"
-                  ? "bg-[#C084FC] text-black shadow-md shadow-[#C084FC]/30"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              🇪🇹 አማርኛ
-            </button>
-            <button
-              onClick={() => { playSound('select'); setLanguage("en"); }}
-              className={`px-3 py-1 rounded-lg font-bold transition-all ${
-                language === "en"
-                  ? "bg-[#22D3EE] text-black shadow-md shadow-[#22D3EE]/30"
-                  : "text-slate-400 hover:text-white"
-              }`}
-            >
-              🇬🇧 English
-            </button>
-          </div>
-        </div>
-
-        {/* Sound Effects Toggle */}
-        <div className="flex items-center justify-between border-t border-white/5 pt-3">
-          <div className="flex items-center gap-2.5 text-xs text-slate-200 font-semibold">
-            {soundEnabled ? (
-              <Volume2 className="text-[#C084FC]" size={18} />
-            ) : (
-              <VolumeX className="text-rose-400" size={18} />
-            )}
-            <div>
-              <div>{language === "am" ? "የድምፅ ውጤቶች" : "Sound Effects"}</div>
-              <div className="text-[10px] text-slate-400 font-normal">
-                {soundEnabled
-                  ? language === "am"
-                    ? "ድምፅ በርቷል"
-                    : "Sound ON"
-                  : language === "am"
-                  ? "ድምፅ ተዘግቷል"
-                  : "Sound OFF"}
+          <div className="bg-[#000000] p-2.5 rounded-xl border border-white/5">
+            <div className="text-slate-400 text-[10px]">Win Rate</div>
+            <div className="font-extrabold text-[#22D3EE] text-sm mt-0.5">{winRate}%</div>
               </div>
             </div>
           </div>
 
           <button
-            onClick={() => { playSound(); toggleSound(); }}
-            className={`w-12 h-6 rounded-full transition-colors p-1 flex items-center ${
-              soundEnabled ? "bg-[#C084FC] justify-end" : "bg-[#12121c] justify-start border border-white/10"
-            }`}
-          >
-            <div className={`w-4 h-4 rounded-full ${soundEnabled ? "bg-black" : "bg-slate-500"}`} />
-          </button>
-        </div>
-
-        {/* Vibration / Haptics Toggle */}
-        <div className="flex items-center justify-between border-t border-white/5 pt-3">
+        onClick={() => { playSound(); setActiveTab("settings"); }}
+        className="w-full glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between hover:bg-white/5 transition-all"
+      >
           <div className="flex items-center gap-2.5 text-xs text-slate-200 font-semibold">
-            <Smartphone className="text-[#22D3EE]" size={18} />
-            <div>
-              <div>{language === "am" ? "የንቅናቄ ግፊት (Haptics)" : "Haptic Vibration"}</div>
+          <SettingsIcon className="text-[#C084FC]" size={18} />
+          <div className="text-left">
+            <div>{language === "am" ? "ማስተካከያዎች" : "Settings"}</div>
               <div className="text-[10px] text-slate-400 font-normal">
-                {vibrationEnabled
-                  ? language === "am"
-                    ? "ንቅናቄ በርቷል"
-                    : "Vibration ON"
-                  : language === "am"
-                  ? "ንቅናቄ ተዘግቷል"
-                  : "Vibration OFF"}
-              </div>
+              {language === "am" ? "ድምፅ፣ ቋንቋ እና ሌሎችም" : "Sound, Language & more"}
             </div>
           </div>
-
-          <button
-            onClick={() => { playSound(); toggleVibration(); }}
-            className={`w-12 h-6 rounded-full transition-colors p-1 flex items-center ${
-              vibrationEnabled ? "bg-[#22D3EE] justify-end" : "bg-[#12121c] justify-start border border-white/10"
-            }`}
-          >
-            <div className={`w-4 h-4 rounded-full ${vibrationEnabled ? "bg-black" : "bg-slate-500"}`} />
-          </button>
         </div>
-      </div>
+        <ChevronRight size={18} className="text-slate-400" />
+      </button>
 
       {/* 4. PROVABLY FAIR SEED SETTINGS */}
       <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
@@ -276,51 +179,6 @@ export default function Profile() {
         </button>
       </div>
 
-      {/* 5. CAREER PERFORMANCE STATS */}
-      <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
-          <Award className="text-[#C084FC]" size={18} />
-          <span>{language === "am" ? "የጨዋታ ታሪክ ስታቲስቲክስ" : "Career Performance Stats"}</span>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2 text-center text-xs">
-          <div className="bg-[#000000] p-2.5 rounded-xl border border-white/5">
-            <div className="text-slate-400 text-[10px]">Total Played</div>
-            <div className="font-extrabold text-white text-sm mt-0.5">{totalGames}</div>
-          </div>
-          <div className="bg-[#000000] p-2.5 rounded-xl border border-white/5">
-            <div className="text-slate-400 text-[10px]">Winnings</div>
-            <div className="font-extrabold text-emerald-400 text-sm mt-0.5">{winnings.toFixed(0)} ETB</div>
-          </div>
-          <div className="bg-[#000000] p-2.5 rounded-xl border border-white/5">
-            <div className="text-slate-400 text-[10px]">Win Rate</div>
-            <div className="font-extrabold text-[#22D3EE] text-sm mt-0.5">{winRate}%</div>
-          </div>
-        </div>
-      </div>
-
-      {/* 6. HELP, RULES & DEV AUTH SHORTCUT */}
-      <div className="glass-card rounded-2xl p-4 space-y-2 border border-white/10">
-        <button
-          onClick={() => { playSound(); setShowHowToPlay(!showHowToPlay); }}
-          className="w-full flex items-center justify-between p-2 rounded-xl bg-[#12121c] hover:bg-[#1a1a2e] text-xs font-bold text-slate-200 transition-all"
-        >
-          <span className="flex items-center gap-2">
-            <HelpCircle size={16} className="text-[#22D3EE]" />
-            {language === "am" ? "የኬኖ አጫወት መመሪያ" : "How to Play Keno Guide"}
-          </span>
-          <ChevronRight size={16} className={showHowToPlay ? "rotate-90 transition-transform" : ""} />
-        </button>
-
-        {showHowToPlay && (
-          <div className="p-3 bg-[#000000] rounded-xl text-xs text-slate-300 space-y-2 border border-white/5 animate-fade-in">
-            <p>1. {language === "am" ? "ከ1 እስከ 80 ባሉት ቁጥሮች ውስጥ ከ1 እስከ 10 ቁጥሮችን ይምረጡ።" : "Select between 1 to 10 numbers from the 1–80 grid."}</p>
-            <p>2. {language === "am" ? "የመወራረጃ ገንዘብዎን በቤት ገፅ ያስገቡ።" : "Configure your wager amount on the Home screen."}</p>
-            <p>3. {language === "am" ? "20 እጣ ቁጥሮች በቅጽበት ይወጣሉ። የገጣጠሟቸው ቁጥሮች በበዙ ቁጥር አሸናፊነትዎ ያድጋል!" : "20 random winning numbers will be drawn. Match more numbers to win up to 100,000x jackpot!"}</p>
-          </div>
-        )}
-
-      </div>
     </div>
   );
 }
