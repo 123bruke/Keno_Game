@@ -58,7 +58,7 @@ export class TelebirrParser {
       keywords.every((k) => cleanText.toLowerCase().includes(k.toLowerCase())) ||
       (cleanText.includes("ETB") && cleanText.includes("transaction number"));
 
-    const isStandaloneCode = /^[A-Z0-9]{10,12}$/i.test(cleanText);
+    const isStandaloneCode = /^[A-Z0-9-]{10,15}$/i.test(cleanText);
     const isManualRef = /^YB-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(cleanText);
 
     return isFullMessage || isStandaloneCode || isManualRef;

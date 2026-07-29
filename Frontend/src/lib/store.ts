@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-export type Tab = "home" | "game" | "history" | "wallet" | "fair" | "profile" | "admin";
+export type Tab = "home" | "game" | "history" | "wallet" | "fair" | "profile" | "admin" | "settings";
 export type GameMode = "INSTANT" | "CLASSIC";
 export type Language = "am" | "en";
 

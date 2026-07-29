@@ -44,7 +44,7 @@ export class FairnessService {
     return Array.from(pool).sort((a, b) => a - b);
   }
 
-  async commit(tx: Prisma.TransactionClient, gameId: string) {
+  async commit(tx: Prisma.TransactionClient, gameId: string, providedClientSeed?: string) {
     const existing = await this.repository.findByGameId(gameId);
     if (existing) {
       return existing;
@@ -52,7 +52,7 @@ export class FairnessService {
 
     const serverSeed = this.generateServerSeed();
     const serverSeedHash = this.hashServerSeed(serverSeed);
-    const clientSeed = this.generateClientSeed();
+    const clientSeed = providedClientSeed ?? this.generateClientSeed();
     const nonce = 0;
 
     return this.repository.create(tx, {

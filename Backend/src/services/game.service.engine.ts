@@ -25,6 +25,7 @@ export class GameEngineService {
 
   async play(userId: string, dto: PlayGameDto) {
     const mode = dto.mode ?? GameMode.INSTANT;
+    const clientSeed = dto.clientSeed;
     const ticketsToPlay: SingleTicketDto[] = dto.tickets && dto.tickets.length > 0
       ? dto.tickets
       : [{ bet: dto.bet!, selectedNumbers: dto.selectedNumbers! }];
@@ -40,19 +41,19 @@ export class GameEngineService {
     }
 
     if (mode === GameMode.INSTANT) {
-      return this.playInstant(userId, ticketsToPlay);
+      return this.playInstant(userId, ticketsToPlay, clientSeed);
     } else {
-      return this.playClassic(userId, ticketsToPlay);
+      return this.playClassic(userId, ticketsToPlay, clientSeed);
     }
   }
 
-  private async playInstant(userId: string, tickets: SingleTicketDto[]) {
+  private async playInstant(userId: string, tickets: SingleTicketDto[], clientSeed?: string) {
     return prisma.$transaction(async (tx) => {
       const latest = await this.game.getLatest(tx);
       const nextRound = latest ? latest.roundNumber + 1 : 1;
 
       const game = await this.game.createInstantGame(tx, nextRound);
-      const fairnessRecord = await this.fairness.commit(tx, game.id);
+      const fairnessRecord = await this.fairness.commit(tx, game.id, clientSeed);
 
       const drawNumbers = this.fairness.generateDrawNumbers(
         fairnessRecord.serverSeed,
@@ -139,10 +140,10 @@ export class GameEngineService {
     });
   }
 
-  private async playClassic(userId: string, tickets: SingleTicketDto[]): Promise<TicketAcceptedDto[]> {
+  private async playClassic(userId: string, tickets: SingleTicketDto[], clientSeed?: string): Promise<TicketAcceptedDto[]> {
     return prisma.$transaction(async (tx) => {
       const game = await this.game.getOrCreateCurrentGame(tx);
-      await this.fairness.commit(tx, game.id);
+      await this.fairness.commit(tx, game.id, clientSeed);
 
       const acceptedTickets: TicketAcceptedDto[] = [];
 

@@ -1,7 +1,7 @@
 import { useAppStore } from "../lib/store";
 import { playSound } from "../lib/sound";
 import { useWallet, useCurrentRound } from "../lib/hooks";
-import { Zap, Clock, Flame, Wallet as WalletIcon, ArrowRight } from "lucide-react";
+import { Zap, Clock, Flame, ArrowRight } from "lucide-react";
 
 const PRESETS = [10, 25, 50, 100, 250];
 
@@ -30,22 +30,26 @@ export default function Home() {
       <div className="glass-card rounded-2xl p-5 border border-white/10 relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-40 h-40 bg-gradient-to-br from-[#C084FC]/30 to-[#22D3EE]/30 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-xs text-slate-400">{language === "am" ? "እንኳን ደህና መጡ" : "Welcome Back"}</div>
-            <h2 className="text-lg font-extrabold text-white">
-              {currentUser?.firstName || currentUser?.username || (language === "am" ? "የኬኖ ተጫዋች" : "Keno Player")}
-            </h2>
+        <div className="flex flex-col items-center text-center">
+          <div className="text-4xl font-black bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-white bg-clip-text text-transparent mb-1">
+            ኬኖ
           </div>
-          <div className="text-right">
-            <div className="text-[10px] text-slate-400 flex items-center justify-end gap-1">
-              <WalletIcon size={12} className="text-[#C084FC]" /> {language === "am" ? "ጠቅላላ ሂሳብ" : "Total Balance"}
-            </div>
-            <div className="text-xl font-black text-white font-mono">
-              {Number(wallet?.totalBalance || 0).toFixed(2)}{" "}
-              <span className="text-xs font-bold text-[#22D3EE]">{wallet?.currency ?? "ETB"}</span>
-            </div>
+          <div className="text-sm text-slate-400">{language === "am" ? "እንኳን ደህና መጡ" : "Welcome Back"}</div>
+          <h2 className="text-lg font-extrabold text-white">
+            {currentUser?.firstName || currentUser?.username || (language === "am" ? "የኬኖ ተጫዋች" : "Keno Player")}
+          </h2>
+          <div className="text-[10px] text-slate-500 mt-0.5">
+            @{currentUser?.username || "player"}
+            {(currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN") && (
+              <span
+                onClick={(e) => { playSound('select'); e.stopPropagation(); setActiveTab("admin"); }}
+                className="text-[#22D3EE] font-bold underline cursor-pointer ml-2"
+              >
+                [ADMIN]
+              </span>
+            )}
           </div>
+
         </div>
 
         {roundData && (

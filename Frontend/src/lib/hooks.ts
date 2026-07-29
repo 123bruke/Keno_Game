@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { walletApi, gameApi } from "./api";
+import { useAppStore } from "./store";
 
 export {
   useAdminSettings,
@@ -64,7 +65,10 @@ export function usePlayKeno() {
       selectedNumbers: number[];
       betAmount: number;
       mode?: "INSTANT" | "CLASSIC";
-    }) => gameApi.play(selectedNumbers, betAmount, mode),
+    }) => {
+      const clientSeed = useAppStore.getState().clientSeed;
+      return gameApi.play(selectedNumbers, betAmount, mode, clientSeed);
+    },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["wallet"] });
       qc.invalidateQueries({ queryKey: ["history"] });

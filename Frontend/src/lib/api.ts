@@ -184,12 +184,13 @@ export const gameApi = {
     const res = await api.get("/games/keno/current");
     return res.data.data as CurrentRound;
   },
-  play: async (selectedNumbers: number[], betAmount: number, mode: "INSTANT" | "CLASSIC" = "INSTANT") => {
+  play: async (selectedNumbers: number[], betAmount: number, mode: "INSTANT" | "CLASSIC" = "INSTANT", clientSeed?: string) => {
     await ensureAuth();
     const res = await api.post("/games/keno/play", {
       mode,
       bet: betAmount,
       selectedNumbers,
+      ...(clientSeed && { clientSeed }),
     });
     return res.data.data as PlayResponse;
   },

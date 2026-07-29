@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useAppStore, Tab } from "./lib/store";
-import { usePlayKeno, useCurrentRound, useWallet } from "./lib/hooks";
+import { usePlayKeno, useCurrentRound } from "./lib/hooks";
 import { ensureAuth } from "./lib/api";
 import { playSound } from "./lib/sound";
 import SplashScreen from "./components/SplashScreen";
@@ -13,6 +13,7 @@ import Wallet from "./components/Wallet";
 import History from "./components/History";
 import ProvablyFair from "./components/ProvablyFair";
 import Profile from "./components/Profile";
+import Settings from "./components/Settings";
 import AdminDashboard from "./features/admin/AdminDashboard";
 import { Home as HomeIcon, Clock, WalletIcon, ShieldCheck, User as UserIcon, ArrowLeft } from "lucide-react";
 
@@ -54,7 +55,6 @@ function AppContent() {
 
   const playMutation = usePlayKeno();
   const { data: roundData } = useCurrentRound();
-  const { data: walletData } = useWallet();
 
   const [gameResultData, setGameResultData] = useState<any>(null);
   const [drawWinning, setDrawWinning] = useState<number[]>([]);
@@ -133,38 +133,6 @@ function AppContent() {
 
   return (
     <div className="min-h-dvh flex flex-col max-w-lg mx-auto bg-[#000000] text-slate-100 selection:bg-[#C084FC] selection:text-black">
-      {/* Header Bar */}
-      <header className="px-4 pt-4 pb-3 flex items-center justify-between border-b border-white/10 glass-card">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => { playSound(); setActiveTab("home"); }}>
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#C084FC] to-[#22D3EE] flex items-center justify-center font-black text-black text-base shadow-lg shadow-[#C084FC]/30">
-            K
-          </div>
-          <div>
-            <h1 className="text-base font-extrabold tracking-wide bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-white bg-clip-text text-transparent">
-              ኬኖ
-            </h1>
-            <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-              <span>{currentUser?.username ? `@${currentUser.username}` : (language === "am" ? "ተጠቃሚ" : "Dev User")}</span>
-              {(currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN") && (
-                <span
-                  onClick={(e) => { playSound('select'); e.stopPropagation(); setActiveTab("admin"); }}
-                  className="text-[#22D3EE] font-bold underline cursor-pointer"
-                >
-                  [ADMIN DASHBOARD]
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {/* Dev Auth button removed for production */}
-          <span className="text-[11px] font-bold text-[#22D3EE] bg-[#12121c] px-2.5 py-1 rounded-full border border-white/10 font-mono">
-            {Number(walletData?.totalBalance || 0).toFixed(0)} ETB
-          </span>
-        </div>
-      </header>
-
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto px-4 py-4 pb-24">
         {activeTab === "home" && <Home />}
@@ -189,6 +157,7 @@ function AppContent() {
         {activeTab === "wallet" && <Wallet />}
         {activeTab === "fair" && <ProvablyFair />}
         {activeTab === "profile" && <Profile />}
+        {activeTab === "settings" && <Settings />}
       </main>
 
       {/* Client Bottom Navigation Bar */}
