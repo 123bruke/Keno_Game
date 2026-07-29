@@ -37,6 +37,16 @@ export default function Home() {
             <h2 className="text-lg font-extrabold text-white">
               {currentUser?.firstName || currentUser?.username || "Keno Player"}
             </h2>
+          <div className="text-[10px] text-slate-500 mt-0.5">
+            @{currentUser?.username || "player"}
+            {(currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN") && (
+              <span
+                onClick={(e) => { playSound('select'); e.stopPropagation(); setActiveTab("admin"); }}
+                className="text-[#22D3EE] font-bold underline cursor-pointer ml-2"
+              >
+                [ADMIN]
+              </span>
+            )}
           </div>
 
         </div>
