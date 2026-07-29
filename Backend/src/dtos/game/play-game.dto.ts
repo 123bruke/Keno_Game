@@ -15,6 +15,7 @@ export const SingleTicketSchema = z.object({
 
 export const PlayGameSchema = z.object({
   mode: z.nativeEnum(GameMode).optional().default(GameMode.INSTANT),
+  clientSeed: z.string().optional(),
   bet: z.number().positive("Bet must be greater than 0").optional(),
   selectedNumbers: z
     .array(z.number().int().min(1).max(80))

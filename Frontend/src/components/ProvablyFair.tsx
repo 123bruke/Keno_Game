@@ -1,214 +1,251 @@
 import { useState } from "react";
-import { useVerify, useCurrentRound, useSettledGames, useProvablyFair } from "../lib/hooks";
+import { useSettledGames, useProvablyFair } from "../lib/hooks";
 import { playSound } from "../lib/sound";
-import { ShieldCheck, CheckCircle2, RotateCcw } from "lucide-react";
+import { CheckCircle2, XCircle, ShieldCheck } from "lucide-react";
 import { useAppStore } from "../lib/store";
+import { sha256, generateDrawNumbers } from "../lib/crypto";
+
+interface VerifyResult {
+  computedHash: string;
+  hashMatch: boolean;
+  drawNumbers: number[];
+}
 
 export default function ProvablyFair() {
-  const { language } = useAppStore();
-  const { data: round } = useCurrentRound();
+  const { language, clientSeed: myClientSeed } = useAppStore();
   const { data: settledGames } = useSettledGames();
-  const verify = useVerify();
-  const [serverSeed, setServerSeed] = useState("");
-  const [clientSeed, setClientSeed] = useState("");
-  const [nonce, setNonce] = useState(0);
-  const [selectedGameId, setSelectedGameId] = useState<string | undefined>(undefined);
+  const [selectedGameId, setSelectedGameId] = useState("");
+  const [clientSeedInput, setClientSeedInput] = useState(myClientSeed);
+  const [serverSeedInput, setServerSeedInput] = useState("");
+  const [nonceInput, setNonceInput] = useState(0);
+  const [mode, setMode] = useState<"auto" | "manual">("auto");
+  const [verifying, setVerifying] = useState(false);
+  const [result, setResult] = useState<VerifyResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const { data: selectedRecord } = useProvablyFair(selectedGameId, {
-    enabled: !!selectedGameId,
+  const { data: record } = useProvablyFair(selectedGameId, {
+    enabled: mode === "auto" && !!selectedGameId,
   });
 
-  const handleSelectSettled = (gameId: string) => {
-    setSelectedGameId(gameId);
+  const handleAutoVerify = async () => {
+    if (!record) return;
+    setVerifying(true);
+    setError(null);
+    try {
+      const [computedHash, drawNumbers] = await Promise.all([
+        sha256(record.serverSeed),
+        generateDrawNumbers(record.serverSeed, record.clientSeed, record.nonce),
+      ]);
+      setResult({ computedHash, hashMatch: computedHash === record.serverSeedHash, drawNumbers });
+    } catch {
+      setError("Verification computation failed");
+    } finally {
+      setVerifying(false);
+    }
   };
 
-  const handleAutoVerify = () => {
-    if (!selectedRecord) return;
-    setServerSeed(selectedRecord.serverSeed);
-    setClientSeed(selectedRecord.clientSeed);
-    setNonce(selectedRecord.nonce);
-    verify.mutate({
-      serverSeed: selectedRecord.serverSeed,
-      clientSeed: selectedRecord.clientSeed,
-      nonce: selectedRecord.nonce,
-    });
+  const handleManualVerify = async () => {
+    if (!serverSeedInput || !clientSeedInput) return;
+    setVerifying(true);
+    setError(null);
+    try {
+      const [computedHash, drawNumbers] = await Promise.all([
+        sha256(serverSeedInput),
+        generateDrawNumbers(serverSeedInput, clientSeedInput, nonceInput),
+      ]);
+      setResult({ computedHash, hashMatch: false, drawNumbers });
+    } catch {
+      setError("Verification computation failed");
+    } finally {
+      setVerifying(false);
+    }
   };
 
-  const handleReset = () => {
-    setServerSeed("");
-    setClientSeed("");
-    setNonce(0);
-    setSelectedGameId(undefined);
-    verify.reset();
+  const reset = () => {
+    setSelectedGameId("");
+    setServerSeedInput("");
+    setClientSeedInput(myClientSeed);
+    setNonceInput(0);
+    setResult(null);
+    setError(null);
   };
 
-  if (!round) {
-    return <div className="text-center py-12 text-slate-400">{language === "am" ? "የግልጽነት መረጃ በመጫን ላይ..." : "Loading transparency info..."}</div>;
-  }
+  const games = settledGames?.filter((g: any) => g.status === "COMPLETED") ?? [];
 
   return (
-    <div className="space-y-4">
-      {/* Current Round Seed Info */}
-      <div className="glass-card rounded-2xl p-4 space-y-2 border border-white/10">
-        <div className="flex items-center gap-2 mb-2 text-[#22D3EE]">
-          <ShieldCheck size={20} />
-          <h3 className="font-bold text-sm text-white">{language === "am" ? "የንቁ ዙር ግልጽነት" : "Active Round Transparency"}</h3>
-        </div>
-        <div className="space-y-2 text-xs">
-          <div className="flex justify-between">
-            <span className="text-slate-400">{language === "am" ? "ንቁ የጨዋታ መታወቂያ:" : "Active Game ID:"}</span>
-            <span className="font-mono text-slate-300 text-[10px] truncate max-w-[200px]">{round?.gameId || "N/A"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">{language === "am" ? "የሰርቨር ሴድ ሃሽ (SHA256):" : "Server Seed Hash (SHA256):"}</span>
-            <span className="font-mono text-[#C084FC] text-[10px] break-all max-w-[200px]">{round?.serverSeedHash || "N/A"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">{language === "am" ? "የደንበኛ ሴድ:" : "Client Seed:"}</span>
-            <span className="font-mono text-[#22D3EE]">{round?.clientSeed || "N/A"}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-400">{language === "am" ? "ኖንስ:" : "Nonce:"}</span>
-            <span className="font-mono text-slate-200">{round?.nonce ?? 0}</span>
-          </div>
-        </div>
+    <div className="space-y-3">
+      {/* Mode toggle */}
+      <div className="flex gap-1 bg-black rounded-xl p-1 border border-keno-border">
+        <button
+          onClick={() => { setMode("auto"); reset(); }}
+          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === "auto" ? "bg-keno-cyan text-black" : "text-keno-muted"}`}
+        >
+          {language === "am" ? "አውቶማቲክ" : "Auto Verify"}
+        </button>
+        <button
+          onClick={() => { setMode("manual"); reset(); }}
+          className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${mode === "manual" ? "bg-keno-cyan text-black" : "text-keno-muted"}`}
+        >
+          {language === "am" ? "በእጅ" : "Manual"}
+        </button>
       </div>
 
-      {/* Past Settled Rounds */}
-      <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
-        <div className="flex items-center gap-2 mb-1 text-emerald-400">
-          <RotateCcw size={18} />
-          <h3 className="font-bold text-sm text-white">{language === "am" ? "ያለፉ የተጠናቀቁ ዙሮች" : "Past Settled Rounds"}</h3>
-        </div>
-        {!settledGames || settledGames.length === 0 ? (
-          <p className="text-xs text-slate-400">{language === "am" ? "እስካሁን የተጠናቀቀ ዙር የለም።" : "No settled rounds yet."}</p>
-        ) : (
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {settledGames.map((game: any) => (
-              <button
-                key={game.id}
-                onClick={() => { playSound(); handleSelectSettled(game.id); }}
-                className={`w-full text-left px-3 py-2 rounded-xl border text-xs transition-all ${
-                  selectedGameId === game.id
-                    ? "border-[#C084FC] bg-[#C084FC]/10"
-                    : "border-white/10 bg-[#000000] hover:border-emerald-500/30"
-                }`}
-              >
-                <div className="flex justify-between items-center">
-                  <span className="text-white font-semibold">{language === "am" ? `ዙር #${game.roundNumber}` : `Round #${game.roundNumber}`}</span>
-                  <span className="text-xs text-slate-400">{game.status}</span>
-                </div>
-                <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                  {new Date(game.startedAt).toLocaleString()} | {game.mode}
-                </div>
-              </button>
-            ))}
+      {/* Auto mode */}
+      {mode === "auto" && (
+        <div className="glass-card rounded-2xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={18} className="text-keno-green" />
+            <h3 className="font-bold text-sm text-keno-text">{language === "am" ? "የተጠናቀቀ ዙር ይምረጡ" : "Select a Completed Round"}</h3>
           </div>
-        )}
 
-        {selectedRecord && (
-          <div className="bg-[#000000] border border-white/10 rounded-xl p-3 text-xs space-y-2">
-            <div className="flex justify-between items-center">
-              <span className="text-slate-200 font-semibold">{language === "am" ? "የተገለጠ መረጃ" : "Revealed Data"}</span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => { playSound(); handleReset(); }}
-                  className="text-[10px] text-slate-400 hover:text-white underline"
-                >
-                  {language === "am" ? "አጽዳ" : "Clear"}
-                </button>
-                <button
-                  onClick={() => { playSound('select'); handleAutoVerify(); }}
-                  disabled={verify.isPending}
-                  className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-[10px] font-bold hover:bg-emerald-500/30 disabled:opacity-50 transition-all"
-                >
-                  {verify.isPending ? (language === "am" ? "በማረጋገጥ ላይ..." : "Verifying...") : (language === "am" ? "በራስ-ሰር አረጋግጥ" : "Auto Verify")}
-                </button>
-              </div>
-            </div>
-            <div className="space-y-1">
-              <div><span className="text-slate-400">{language === "am" ? "የሰርቨር ሴድ:" : "Server Seed:"}</span> <span className="font-mono text-[10px] text-[#C084FC] break-all">{selectedRecord.serverSeed}</span></div>
-              <div><span className="text-slate-400">{language === "am" ? "የደንበኛ ሴድ:" : "Client Seed:"}</span> <span className="font-mono text-[10px] text-[#22D3EE]">{selectedRecord.clientSeed}</span></div>
-              <div><span className="text-slate-400">{language === "am" ? "ኖንስ:" : "Nonce:"}</span> <span className="font-mono text-slate-200">{selectedRecord.nonce}</span></div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Manual Verification Tool */}
-      <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
-        <h3 className="font-bold text-sm text-slate-200">{language === "am" ? "ያለፈ ድልድል አረጋግጥ" : "Verify Past Draw"}</h3>
-        <p className="text-xs text-slate-400">
-          {language === "am"
-            ? "ከላይ የተጠናቀቀ ዙር ይምረጡ ወይም ድልድሉ ፍትሃዊ መሆኑን ለማረጋገጥ የተገለጠውን የሰርቨር ሴድ፣ የደንበኛ ሴድ እና ኖንስ በእጅ ያስገቡ።"
-            : "Select a settled round above or manually enter the revealed server seed, client seed, and nonce to verify the draw was fair."}
-        </p>
-
-        <input
-          type="text"
-          placeholder={language === "am" ? "የሰርቨር ሴድ (ከድልድል በኋላ የተገለጠ)" : "Server Seed (revealed post-draw)"}
-          value={serverSeed}
-          onChange={(e) => setServerSeed(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#C084FC]"
-        />
-        <input
-          type="text"
-          placeholder={language === "am" ? "የደንበኛ ሴድ" : "Client Seed"}
-          value={clientSeed}
-          onChange={(e) => setClientSeed(e.target.value)}
-          className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#22D3EE]"
-        />
-        <input
-          type="number"
-          placeholder={language === "am" ? "ኖንስ (ለምሳሌ 0)" : "Nonce (e.g. 0)"}
-          value={nonce}
-          onChange={(e) => setNonce(Number(e.target.value))}
-          className="w-full px-3 py-2 rounded-lg bg-[#000000] border border-white/10 text-white text-xs font-mono focus:outline-none focus:border-[#C084FC]"
-        />
-
-        <div className="flex gap-2">
-          <button
-            onClick={() => { playSound('select'); verify.mutate({ serverSeed, clientSeed, nonce }); }}
-            disabled={verify.isPending || !serverSeed || !clientSeed}
-            className="flex-1 py-2.5 rounded-xl bg-[#22D3EE] text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-50 transition-all"
-          >
-            {verify.isPending ? (language === "am" ? "ድልድል በማስላት ላይ..." : "Calculating Draw...") : (language === "am" ? "HMAC-SHA256 አረጋግጥ" : "Verify HMAC-SHA256")}
-          </button>
-          {(verify.data || verify.isError) && (
-            <button
-              onClick={() => { playSound(); handleReset(); }}
-              className="px-3 py-2.5 rounded-xl bg-white/5 text-slate-400 text-sm hover:bg-white/10 transition-all"
+          {games.length === 0 ? (
+            <p className="text-xs text-keno-muted">{language === "am" ? "እስካሁን የተጠናቀቀ ዙር የለም።" : "No completed rounds yet."}</p>
+          ) : (
+            <select
+              value={selectedGameId}
+              onChange={(e) => { setSelectedGameId(e.target.value); setResult(null); setError(null); }}
+              className="w-full px-3 py-2.5 rounded-xl bg-black border border-keno-border text-keno-text text-xs appearance-none cursor-pointer focus:outline-none focus:border-keno-green"
             >
-              {language === "am" ? "አጽዳ" : "Clear"}
-            </button>
+              <option value="">{language === "am" ? "-- ዙር ይምረጡ --" : "-- Select Round --"}</option>
+              {games.map((g: any) => (
+                <option key={g.id} value={g.id}>
+                  {language === "am" ? `ዙር #${g.roundNumber}` : `Round #${g.roundNumber}`} — {new Date(g.startedAt).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
           )}
+
+          {record && (
+            <div className="bg-black rounded-xl p-3 text-xs space-y-1.5 border border-keno-border">
+              <div className="text-keno-muted font-mono text-[10px] break-all"><span className="text-keno-muted">{language === "am" ? "ሰርቨር ሴድ:" : "Server Seed:"}</span> {record.serverSeed}</div>
+              <div className="text-keno-muted font-mono text-[10px]"><span className="text-keno-muted">{language === "am" ? "የደንበኛ ሴድ:" : "Client Seed:"}</span> {record.clientSeed}</div>
+              <div className="text-keno-muted font-mono text-[10px]"><span className="text-keno-muted">Nonce:</span> {record.nonce}</div>
+            </div>
+          )}
+
+          <button
+            onClick={() => { playSound('select'); handleAutoVerify(); }}
+            disabled={verifying || !record}
+            className="w-full py-3 rounded-xl bg-keno-green text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-40 transition-all"
+          >
+            {verifying ? (language === "am" ? "በማረጋገጥ ላይ..." : "Verifying...") : (language === "am" ? "አረጋግጥ" : "Verify")}
+          </button>
         </div>
+      )}
 
-        {verify.data && (
-          <div className="bg-[#000000] border border-emerald-500/30 rounded-xl p-3 text-xs space-y-2">
-            <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
-              <CheckCircle2 size={16} />
-              <span>{language === "am" ? "ድልድሉ በቆራጥነት ተረጋግጧል!" : "Draw Deterministically Verified!"}</span>
+      {/* Manual mode */}
+      {mode === "manual" && (
+        <div className="glass-card rounded-2xl p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={18} className="text-keno-muted" />
+            <h3 className="font-bold text-sm text-keno-text">{language === "am" ? "በእጅ ማረጋገጥ" : "Manual Verification"}</h3>
+          </div>
+
+          <input
+            type="text"
+            placeholder={language === "am" ? "የሰርቨር ሴድ (ከድልድል በኋላ የተገለጠ)" : "Server Seed (revealed post-draw)"}
+            value={serverSeedInput}
+            onChange={(e) => setServerSeedInput(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl bg-black border border-keno-border text-keno-text text-xs font-mono focus:outline-none focus:border-keno-purple"
+          />
+          <input
+            type="text"
+            placeholder={language === "am" ? "የደንበኛ ሴድ" : "Client Seed"}
+            value={clientSeedInput}
+            onChange={(e) => setClientSeedInput(e.target.value)}
+            className="w-full px-3 py-2.5 rounded-xl bg-black border border-keno-border text-keno-text text-xs font-mono focus:outline-none focus:border-keno-cyan"
+          />
+          <input
+            type="number"
+            placeholder="Nonce"
+            value={nonceInput}
+            onChange={(e) => setNonceInput(Number(e.target.value))}
+            className="w-full px-3 py-2.5 rounded-xl bg-black border border-keno-border text-keno-text text-xs font-mono focus:outline-none focus:border-keno-purple"
+          />
+
+          <button
+            onClick={() => { playSound('select'); handleManualVerify(); }}
+            disabled={verifying || !serverSeedInput || !clientSeedInput}
+            className="w-full py-3 rounded-xl bg-keno-cyan text-black font-extrabold text-sm hover:opacity-90 disabled:opacity-40 transition-all"
+          >
+            {verifying ? (language === "am" ? "በማስላት ላይ..." : "Computing...") : (language === "am" ? "HMAC-SHA256 አረጋግጥ" : "Verify HMAC-SHA256")}
+          </button>
+        </div>
+      )}
+
+      {/* Verifying spinner */}
+      {verifying && (
+        <div className="glass-card rounded-2xl p-4 text-center">
+          <p className="text-xs text-keno-muted">{language === "am" ? "SHA256 እና HMAC በአሳሽ ውስጥ በማስላት ላይ..." : "Computing SHA256 and HMAC in browser..."}</p>
+        </div>
+      )}
+
+      {/* Verification result */}
+      {result && !verifying && (
+        <div className={`glass-card rounded-2xl p-4 space-y-3 border ${result.hashMatch ? "border-keno-green/40" : "border-keno-red/40"}`}>
+          {/* PASS / FAIL badge */}
+          <div className={`flex items-center gap-2 ${result.hashMatch ? "text-keno-green" : "text-keno-red"}`}>
+            {result.hashMatch ? <CheckCircle2 size={24} /> : <XCircle size={24} />}
+            <span className="font-extrabold text-base">
+              {result.hashMatch
+                ? (language === "am" ? "ተረጋግጧል" : "VERIFIED")
+                : (language === "am" ? "አልተረጋገጠም" : "FAILED")}
+            </span>
+          </div>
+
+          {/* Hash check */}
+          <div className="bg-black rounded-xl p-3 text-xs space-y-1">
+            <div className="flex items-center gap-1.5">
+              {result.hashMatch
+                ? <CheckCircle2 size={14} className="text-keno-green" />
+                : <XCircle size={14} className="text-keno-red" />
+              }
+              <span className="font-bold text-keno-text">SHA256(serverSeed)</span>
+              <span className={`ml-auto ${result.hashMatch ? "text-keno-green" : "text-keno-red"}`}>
+                {result.hashMatch ? "MATCH" : "MISMATCH"}
+              </span>
             </div>
-            <div className="text-slate-400">
-              <span className="text-slate-200 font-semibold">{language === "am" ? "የሰርቨር ሴድ ሃሽ:" : "Server Seed Hash:"}</span>
-              <div className="font-mono text-[10px] text-[#C084FC] break-all">{verify.data.serverSeedHash}</div>
-            </div>
-            <div>
-              <span className="text-slate-200 font-semibold">{language === "am" ? "አሸናፊ ቁጥሮች (20 ድልድል):" : "Winning Numbers (20 Draw):"}</span>
-              <div className="font-mono text-[#22D3EE] mt-1 font-bold">
-                {verify.data.drawNumbers?.join(", ")}
+            {result.hashMatch && (
+              <div className="font-mono text-[10px] text-keno-muted break-all">{result.computedHash}</div>
+            )}
+            {!result.hashMatch && (
+              <div className="space-y-0.5">
+                <div className="font-mono text-[10px] text-keno-purple break-all">{language === "am" ? "የተሰላ:" : "Computed:"} {result.computedHash}</div>
+                <div className="font-mono text-[10px] text-keno-muted break-all">{language === "am" ? "የተጠበቀ:" : "Expected:"} {record?.serverSeedHash ?? "—"}</div>
               </div>
+            )}
+          </div>
+
+          {/* Draw numbers */}
+          <div className="bg-black rounded-xl p-3 text-xs space-y-1">
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 size={14} className="text-keno-cyan" />
+              <span className="font-bold text-keno-text">{language === "am" ? "ድልድል (20 ቁጥሮች)" : "Draw (20 Numbers)"}</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5 mt-1">
+              {result.drawNumbers.map((n) => (
+                <span key={n} className="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-keno-cyan/10 text-keno-cyan text-xs font-bold">
+                  {n}
+                </span>
+              ))}
             </div>
           </div>
-        )}
 
-        {verify.isError && (
-          <div className="bg-[#000000] border border-red-500/30 rounded-xl p-3 text-xs text-red-400">
-            {language === "am" ? "ማረጋገጥ አልተሳካም። የሴድ ዋጋዎችን ያረጋግጡ።" : "Verification failed. Check the seed values."}
-          </div>
-        )}
-      </div>
+          <button
+            onClick={() => { playSound(); reset(); }}
+            className="w-full py-2.5 rounded-xl bg-white/5 text-keno-muted text-xs font-bold hover:bg-white/10 transition-all"
+          >
+            {language === "am" ? "ሌላ ዙር አረጋግጥ" : "Verify Another Round"}
+          </button>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="glass-card rounded-2xl p-4 border border-keno-red/30">
+          <p className="text-xs text-keno-red">{error}</p>
+        </div>
+      )}
     </div>
   );
 }
