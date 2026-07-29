@@ -14,6 +14,7 @@ export default function Home() {
     betAmount,
     setBetAmount,
     currentUser,
+    language,
   } = useAppStore();
 
   const { data: wallet } = useWallet();
@@ -33,9 +34,9 @@ export default function Home() {
           <div className="text-4xl font-black bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-white bg-clip-text text-transparent mb-1">
             ኬኖ
           </div>
-          <div className="text-sm text-slate-400">Welcome Back</div>
+          <div className="text-sm text-slate-400">{language === "am" ? "እንኳን ደህና መጡ" : "Welcome Back"}</div>
           <h2 className="text-lg font-extrabold text-white">
-            {currentUser?.firstName || currentUser?.username || "Keno Player"}
+            {currentUser?.firstName || currentUser?.username || (language === "am" ? "የኬኖ ተጫዋች" : "Keno Player")}
           </h2>
           <div className="text-[10px] text-slate-500 mt-0.5">
             @{currentUser?.username || "player"}
@@ -53,15 +54,15 @@ export default function Home() {
 
         {roundData && (
           <div className="mt-3 pt-3 border-t border-white/10 flex items-center justify-between text-xs">
-            <span className="text-slate-400">Active Classic Round:</span>
-            <span className="text-[#22D3EE] font-bold">Round #{roundData.roundNumber}</span>
+            <span className="text-slate-400">{language === "am" ? "ንቁ የክላሲክ ዙር:" : "Active Classic Round:"}</span>
+            <span className="text-[#22D3EE] font-bold">{language === "am" ? `ዙር #${roundData.roundNumber}` : `Round #${roundData.roundNumber}`}</span>
           </div>
         )}
       </div>
 
       {/* Game Mode Selection */}
       <div className="space-y-2">
-        <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">Select Game Mode</div>
+        <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">{language === "am" ? "የጨዋታ ዓይነት ይምረጡ" : "Select Game Mode"}</div>
         <div className="grid grid-cols-2 gap-2">
           <div
             onClick={() => { playSound('select'); setGameMode("INSTANT"); }}
@@ -74,8 +75,8 @@ export default function Home() {
             <div className="p-2 rounded-xl bg-[#C084FC]/20 text-[#C084FC] w-fit mb-2">
               <Zap size={20} />
             </div>
-            <h3 className="font-extrabold text-sm text-white">Instant Keno</h3>
-            <p className="text-[11px] text-slate-400 mt-1">Draws numbers immediately with instant payouts.</p>
+            <h3 className="font-extrabold text-sm text-white">{language === "am" ? "ፈጣን ኬኖ" : "Instant Keno"}</h3>
+            <p className="text-[11px] text-slate-400 mt-1">{language === "am" ? "ቁጥሮች ወዲያውኑ ይወጣሉ፣ ወዲያውኑ ይከፈላል።" : "Draws numbers immediately with instant payouts."}</p>
           </div>
 
           <div
@@ -89,8 +90,8 @@ export default function Home() {
             <div className="p-2 rounded-xl bg-[#22D3EE]/20 text-[#22D3EE] w-fit mb-2">
               <Clock size={20} />
             </div>
-            <h3 className="font-extrabold text-sm text-white">Classic Round</h3>
-            <p className="text-[11px] text-slate-400 mt-1">Scheduled multiplayer rounds drawn every 30s.</p>
+            <h3 className="font-extrabold text-sm text-white">{language === "am" ? "ክላሲክ ዙር" : "Classic Round"}</h3>
+            <p className="text-[11px] text-slate-400 mt-1">{language === "am" ? "በየ30 ሰከንድ የሚወጡ የቡድን ዙሮች።" : "Scheduled multiplayer rounds drawn every 30s."}</p>
           </div>
         </div>
       </div>
@@ -98,7 +99,7 @@ export default function Home() {
       {/* Bet Wager Selector */}
       <div className="glass-card rounded-2xl p-4 space-y-3 border border-white/10">
         <div className="text-xs text-slate-400 flex justify-between">
-          <span>Set Wager per Bet (ETB)</span>
+          <span>{language === "am" ? "የውርርድ መጠን ያዘጋጁ (ETB)" : "Set Wager per Bet (ETB)"}</span>
           <span className="font-bold text-[#22D3EE] font-mono">{betAmount} ETB</span>
         </div>
         <div className="flex gap-1.5">
@@ -119,14 +120,14 @@ export default function Home() {
 
         {/* Manual Custom Bet Input */}
         <div className="pt-1">
-          <label className="text-[11px] text-slate-400 block mb-1">Or Enter Custom Amount:</label>
+          <label className="text-[11px] text-slate-400 block mb-1">{language === "am" ? "ወይም የራስዎን መጠን ያስገቡ:" : "Or Enter Custom Amount:"}</label>
           <input
             type="number"
             min={1}
             max={wallet?.totalBalance ?? 10000}
             value={betAmount}
             onChange={(e) => setBetAmount(Math.max(1, Number(e.target.value)))}
-            placeholder="Enter custom wager amount..."
+            placeholder={language === "am" ? "የውርርድ መጠን ያስገቡ..." : "Enter custom wager amount..."}
             className="w-full px-3 py-2.5 rounded-xl bg-[#000000] border border-white/10 text-white font-mono text-sm focus:outline-none focus:border-[#C084FC] transition-all"
           />
         </div>
@@ -139,8 +140,8 @@ export default function Home() {
       >
         <Flame size={22} className="fill-black" />
         {selectedNumbers.length > 0
-          ? `ENTER GAME (${selectedNumbers.length} Selected)`
-          : "GO TO GAME BOARD"}
+          ? (language === "am" ? `ወደ ጨዋታ ግቡ (${selectedNumbers.length} ተመርጧል)` : `ENTER GAME (${selectedNumbers.length} Selected)`)
+          : (language === "am" ? "ወደ ጨዋታ ሰሌዳ ይሂዱ" : "GO TO GAME BOARD")}
         <ArrowRight size={22} />
       </button>
     </div>

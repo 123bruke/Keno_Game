@@ -20,12 +20,19 @@ import { Home as HomeIcon, Clock, WalletIcon, ShieldCheck, User as UserIcon, Arr
 const qc = new QueryClient();
 
 // Client Navigation Tabs
-const TABS: { id: Tab; label: string; icon: any }[] = [
+const TABS_EN: { id: Tab; label: string; icon: any }[] = [
   { id: "home", label: "Home", icon: HomeIcon },
   { id: "history", label: "History", icon: Clock },
   { id: "wallet", label: "Wallet", icon: WalletIcon },
   { id: "fair", label: "Fairness", icon: ShieldCheck },
   { id: "profile", label: "Profile", icon: UserIcon },
+];
+const TABS_AM: { id: Tab; label: string; icon: any }[] = [
+  { id: "home", label: "መነሻ", icon: HomeIcon },
+  { id: "history", label: "ታሪክ", icon: Clock },
+  { id: "wallet", label: "ኪስ ቦርሳ", icon: WalletIcon },
+  { id: "fair", label: "ፍትሃዊነት", icon: ShieldCheck },
+  { id: "profile", label: "መገለጫ", icon: UserIcon },
 ];
 
 function AppContent() {
@@ -40,8 +47,11 @@ function AppContent() {
     clearSelection,
     currentUser,
     setCurrentUser,
+    language,
 
   } = useAppStore();
+
+  const TABS = language === "am" ? TABS_AM : TABS_EN;
 
   const playMutation = usePlayKeno();
   const { data: roundData } = useCurrentRound();
@@ -91,12 +101,12 @@ function AppContent() {
               }
             }, 70);
           } else {
-            alert(`Ticket accepted for Classic Round #${data.roundNumber}!`);
+            alert(language === "am" ? `ትኬት ለክላሲክ ዙር #${data.roundNumber} ተመዝግቧል!` : `Ticket accepted for Classic Round #${data.roundNumber}!`);
             clearSelection();
           }
         },
         onError: (err: any) => {
-          alert(err?.response?.data?.message || err?.message || "Failed to place bet");
+          alert(err?.response?.data?.message || err?.message || (language === "am" ? "ውርርድ ማድረግ አልተሳካም" : "Failed to place bet"));
         },
       }
     );
@@ -133,10 +143,10 @@ function AppContent() {
                 onClick={() => { playSound(); setActiveTab("home"); }}
                 className="flex items-center gap-1 text-xs font-bold text-[#C084FC] hover:text-white transition-all bg-[#12121c] px-3 py-1.5 rounded-xl border border-white/10"
               >
-                <ArrowLeft size={14} /> Back to Home
+                <ArrowLeft size={14} /> {language === "am" ? "ወደ መነሻ ተመለስ" : "Back to Home"}
               </button>
               <span className="text-xs text-slate-400 font-mono">
-                {gameMode} MODE
+                {gameMode === "INSTANT" ? (language === "am" ? "ፈጣን ሁነታ" : "INSTANT MODE") : (language === "am" ? "ክላሲክ ሁነታ" : "CLASSIC MODE")}
               </span>
             </div>
             <KenoBoard winningNumbers={drawWinning} revealedCount={drawRevealed} />

@@ -1,5 +1,6 @@
 import { Trophy, X, Sparkles } from "lucide-react";
 import { playSound } from "../lib/sound";
+import { useAppStore } from "../lib/store";
 
 export default function GameResult({
   result,
@@ -23,6 +24,7 @@ export default function GameResult({
   };
   onClose: () => void;
 }) {
+  const { language } = useAppStore();
   const ticket = result.settledTickets[0];
   const isWin = (ticket?.payout ?? 0) > 0;
 
@@ -42,9 +44,9 @@ export default function GameResult({
             )}
             <div>
               <h3 className="text-lg font-extrabold text-white">
-                {isWin ? "WINNER!" : "NO MATCH"}
+                {isWin ? (language === "am" ? "አሸናፊ!" : "WINNER!") : (language === "am" ? "ግጥሚያ የለም" : "NO MATCH")}
               </h3>
-              <p className="text-xs text-slate-400">Round #{result.roundNumber}</p>
+              <p className="text-xs text-slate-400">{language === "am" ? `ዙር #${result.roundNumber}` : `Round #${result.roundNumber}`}</p>
             </div>
           </div>
           <button
@@ -58,8 +60,8 @@ export default function GameResult({
         {/* Drawn Numbers Grid */}
         <div>
           <div className="text-xs text-slate-400 mb-2 flex justify-between">
-            <span>Winning Draw (20 Numbers)</span>
-            <span className="text-[#22D3EE] font-bold">{ticket?.matches ?? 0} Matched</span>
+            <span>{language === "am" ? "የወጡ ቁጥሮች (20 ቁጥሮች)" : "Winning Draw (20 Numbers)"}</span>
+            <span className="text-[#22D3EE] font-bold">{ticket?.matches ?? 0} {language === "am" ? "ተመሳስሏል" : "Matched"}</span>
           </div>
           <div className="grid grid-cols-5 gap-1.5 max-h-48 overflow-y-auto pr-1">
             {result.drawNumbers.map((num) => {
@@ -83,27 +85,27 @@ export default function GameResult({
         {/* Ticket Summary */}
         <div className="space-y-2 text-xs bg-[#000000] p-3 rounded-xl border border-white/10">
           <div className="flex justify-between">
-            <span className="text-slate-400">Your Selection:</span>
+            <span className="text-slate-400">{language === "am" ? "የእርስዎ ምርጫ:" : "Your Selection:"}</span>
             <span className="font-mono text-[#C084FC] font-bold">
               {ticket?.selectedNumbers.join(", ")}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">Matches:</span>
+            <span className="text-slate-400">{language === "am" ? "ግጥሚያዎች:" : "Matches:"}</span>
             <span className="font-mono text-emerald-400 font-bold">
               {ticket?.matches ?? 0} / {ticket?.selectedNumbers.length ?? 0}
             </span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">Bet Amount:</span>
+            <span className="text-slate-400">{language === "am" ? "የውርርድ መጠን:" : "Bet Amount:"}</span>
             <span className="font-mono text-slate-200">{ticket?.betAmount} ETB</span>
           </div>
           <div className="flex justify-between">
-            <span className="text-slate-400">Multiplier:</span>
+            <span className="text-slate-400">{language === "am" ? "ማባዣ:" : "Multiplier:"}</span>
             <span className="font-mono text-[#22D3EE] font-bold">{ticket?.multiplier}x</span>
           </div>
           <div className="flex justify-between text-sm font-extrabold border-t border-white/10 pt-2">
-            <span>{isWin ? "Total Prize:" : "Outcome:"}</span>
+            <span>{isWin ? (language === "am" ? "ጠቅላላ ሽልማት:" : "Total Prize:") : (language === "am" ? "ውጤት:" : "Outcome:")}</span>
             <span className={isWin ? "text-emerald-400" : "text-rose-400"}>
               {isWin ? `+${ticket?.payout.toFixed(2)} ETB` : `-${ticket?.betAmount} ETB`}
             </span>
@@ -114,7 +116,7 @@ export default function GameResult({
           onClick={() => { playSound('success'); onClose(); }}
           className="w-full py-3 rounded-xl bg-[#12121c] hover:bg-[#1a1a2e] text-white font-bold text-sm border border-white/10 transition-all"
         >
-          Close & Play Again
+          {language === "am" ? "ዝጋ እና እንደገና ተጫወት" : "Close & Play Again"}
         </button>
       </div>
     </div>
