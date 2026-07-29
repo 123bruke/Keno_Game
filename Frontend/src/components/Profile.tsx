@@ -111,25 +111,34 @@ export default function Profile() {
         <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
           <Award className="text-[#C084FC]" size={18} />
           <span>{language === "am" ? "የጨዋታ ታሪክ ስታቲስቲክስ" : "Career Performance Stats"}</span>
-              </div>
-            </div>
+        </div>
+
+        <div className="grid grid-cols-3 gap-2 text-center text-xs">
+          <div className="bg-[#000000] p-2.5 rounded-xl border border-white/5">
+            <div className="text-slate-400 text-[10px]">Total Played</div>
+            <div className="font-extrabold text-white text-sm mt-0.5">{totalGames}</div>
+          </div>
+          <div className="bg-[#000000] p-2.5 rounded-xl border border-white/5">
+            <div className="text-slate-400 text-[10px]">Winnings</div>
+            <div className="font-extrabold text-emerald-400 text-sm mt-0.5">{winnings.toFixed(0)} ETB</div>
           </div>
           <div className="bg-[#000000] p-2.5 rounded-xl border border-white/5">
             <div className="text-slate-400 text-[10px]">Win Rate</div>
             <div className="font-extrabold text-[#22D3EE] text-sm mt-0.5">{winRate}%</div>
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
 
-          <button
+      {/* 4. SETTINGS LINK */}
+      <button
         onClick={() => { playSound(); setActiveTab("settings"); }}
         className="w-full glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between hover:bg-white/5 transition-all"
       >
-          <div className="flex items-center gap-2.5 text-xs text-slate-200 font-semibold">
+        <div className="flex items-center gap-2.5 text-xs text-slate-200 font-semibold">
           <SettingsIcon className="text-[#C084FC]" size={18} />
           <div className="text-left">
             <div>{language === "am" ? "ማስተካከያዎች" : "Settings"}</div>
-              <div className="text-[10px] text-slate-400 font-normal">
+            <div className="text-[10px] text-slate-400 font-normal">
               {language === "am" ? "ድምፅ፣ ቋንቋ እና ሌሎችም" : "Sound, Language & more"}
             </div>
           </div>

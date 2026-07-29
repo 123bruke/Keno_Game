@@ -13,6 +13,7 @@ import Wallet from "./components/Wallet";
 import History from "./components/History";
 import ProvablyFair from "./components/ProvablyFair";
 import Profile from "./components/Profile";
+import Settings from "./components/Settings";
 import AdminDashboard from "./features/admin/AdminDashboard";
 import { Home as HomeIcon, Clock, WalletIcon, ShieldCheck, User as UserIcon, ArrowLeft } from "lucide-react";
 
@@ -146,6 +147,7 @@ function AppContent() {
         {activeTab === "wallet" && <Wallet />}
         {activeTab === "fair" && <ProvablyFair />}
         {activeTab === "profile" && <Profile />}
+        {activeTab === "settings" && <Settings />}
       </main>
 
       {/* Client Bottom Navigation Bar */}
