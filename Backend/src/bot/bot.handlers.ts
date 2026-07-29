@@ -744,6 +744,16 @@ async function handleTextMessage(bot: Bot, msg: TelegramBot.Message) {
     }
     return;
   }
+
+  if (!state) {
+    await bot.sendMessage(
+      chatId,
+      lang === "am"
+        ? `ለመርዳት አልተረዳሁም። እባክዎ ከታች ካሉት አማራጮች ይምረጡ።`
+        : `I didn't understand that. Please choose an option below.`,
+      { reply_markup: mainMenuKeyboard(lang) },
+    );
+  }
 }
 
 // ─── Photo message handler (screenshot verification) ──────────────────
