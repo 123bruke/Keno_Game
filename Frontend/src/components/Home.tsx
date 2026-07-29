@@ -34,9 +34,9 @@ export default function Home() {
             ኬኖ
           </div>
           <div className="text-sm text-slate-400">Welcome Back</div>
-            <h2 className="text-lg font-extrabold text-white">
-              {currentUser?.firstName || currentUser?.username || "Keno Player"}
-            </h2>
+          <h2 className="text-lg font-extrabold text-white">
+            {currentUser?.firstName || currentUser?.username || "Keno Player"}
+          </h2>
           <div className="text-[10px] text-slate-500 mt-0.5">
             @{currentUser?.username || "player"}
             {(currentUser?.role === "ADMIN" || currentUser?.role === "SUPERADMIN") && (
