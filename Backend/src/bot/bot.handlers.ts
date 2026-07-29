@@ -381,6 +381,12 @@ async function handleTextMessage(bot: Bot, msg: TelegramBot.Message) {
   const text = msg.text?.trim();
   if (!text || !msg.from) return;
 
+  // Skip commands entirely — they're handled by their own bot.onText()
+  // listeners (/start, /play, /balance, etc). Without this, every command
+  // also falls through this generic text handler and triggers the
+  // "I didn't understand" fallback + duplicate main menu underneath it.
+  if (text.startsWith("/")) return;
+
   const telegramId = String(msg.from.id);
   const chatId = msg.chat.id;
   const lang = await getLang(telegramId);
