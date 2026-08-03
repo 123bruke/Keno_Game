@@ -1,5 +1,6 @@
 import { useAppStore } from "../lib/store";
 import { playSound } from "../lib/sound";
+import { MousePointerClick } from "lucide-react";
 
 export default function KenoBoard({
   winningNumbers,
@@ -8,12 +9,34 @@ export default function KenoBoard({
   winningNumbers?: number[];
   revealedCount?: number;
 }) {
-  const { selectedNumbers, toggleNumber } = useAppStore();
+  const { selectedNumbers, toggleNumber, language } = useAppStore();
   const revealed = winningNumbers?.slice(0, revealedCount ?? 0) ?? [];
+  const count = selectedNumbers.length;
 
   return (
-    <div className="glass-card rounded-2xl p-3 shadow-2xl border border-white/10">
-      <div className="grid grid-cols-8 gap-1.5 sm:gap-2">
+    <div className="glass-card rounded-2xl p-3 shadow-2xl border border-white/10 space-y-3">
+      {/* Instruction header */}
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-300">
+          <MousePointerClick size={13} className="text-[#C084FC]" />
+          {language === "am"
+            ? "ከ1 እስከ 10 ቁጥሮች ይምረጡ"
+            : "Pick 1-10 numbers to play"}
+        </div>
+        <div className="flex items-center gap-1.5">
+          <span className={`text-[11px] font-black px-2 py-0.5 rounded-full transition-colors ${
+            count === 0
+              ? "bg-white/5 text-slate-400"
+              : count === 10
+                ? "bg-[#22D3EE]/20 text-[#22D3EE]"
+                : "bg-[#C084FC]/20 text-[#C084FC]"
+          }`}>
+            {count}/10
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-10 gap-1 sm:gap-1.5">
         {Array.from({ length: 80 }, (_, i) => i + 1).map((num) => {
           const isSelected = selectedNumbers.includes(num);
           const isRevealed = revealed.includes(num);
@@ -36,7 +59,7 @@ export default function KenoBoard({
             <button
               key={num}
               onClick={() => { playSound('select'); toggleNumber(num); }}
-              disabled={isRevealed && isRevealed}
+              disabled={isRevealed}
               className={`aspect-square rounded-xl text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center ${bgStyle} ${glowClass} disabled:cursor-not-allowed`}
             >
               {num}
