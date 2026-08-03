@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useSettledGames, useProvablyFair } from "../lib/hooks";
+import { gameApi } from "../lib/api";
 import { playSound } from "../lib/sound";
 import {
   CheckCircle2,
@@ -180,13 +181,22 @@ export default function ProvablyFair() {
         sha256(serverSeedInput),
         generateDrawNumbers(serverSeedInput, clientSeedInput, nonceInput),
       ]);
-      const hasActual = actualDraw.length > 0;
+
+      let serverActual: number[] = [];
+      if (selectedGameId) {
+        const game = await gameApi.result(selectedGameId);
+        serverActual = Array.isArray(game?.drawNumbers)
+          ? game.drawNumbers.map(Number).sort((a, b) => a - b)
+          : [];
+      }
+
+      const hasActual = serverActual.length > 0;
       setResult({
         computedHash,
         drawNumbers: computedDraw,
-        actualDraw: hasActual ? actualDraw : undefined,
+        actualDraw: hasActual ? serverActual : undefined,
         drawMatch: hasActual
-          ? arraysEqual(computedDraw, actualDraw)
+          ? arraysEqual(computedDraw, serverActual)
           : undefined,
       });
     } catch {
