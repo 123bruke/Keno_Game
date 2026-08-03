@@ -8,12 +8,10 @@ import {
   Flame,
   ArrowRight,
   Settings,
-  Coins,
   ChevronRight,
   Plus,
   Minus,
   Sparkles,
-  Wallet as WalletIcon,
   BadgeCheck,
 } from "lucide-react";
 
@@ -41,11 +39,6 @@ export default function Home() {
     greeting: isAm ? "እንኳን ደህና መጡ" : "Welcome Back",
     player: isAm ? "የኬኖ ተጫዋች" : "Keno Player",
     settings: isAm ? "ማስተካከያዎች" : "Settings",
-    balance: isAm ? "የኪስ ቦርሳ" : "Balance",
-    playBal: isAm ? "የጨዋታ ሂሳብ" : "Play Balance",
-    mainBal: isAm ? "ዋና ሂሳብ" : "Main Balance",
-    topUp: isAm ? "ገንዘብ ጨምር" : "Top Up",
-    manageWallet: isAm ? "ኪስ ቦርሳ" : "Wallet",
     activeRound: isAm ? "ንቁ የክላሲክ ዙር" : "Active Classic Round",
     round: (n: number) => (isAm ? `ዙር #${n}` : `Round #${n}`),
     selectMode: isAm ? "የጨዋታ ዓይነት ይምረጡ" : "Select Game Mode",
@@ -125,51 +118,7 @@ export default function Home() {
         </button>
       </div>
 
-      {/* 2. Balance card */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] via-[#0a0a16] to-[#052631] p-5">
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#C084FC]/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-10 w-44 h-44 bg-[#22D3EE]/15 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5 text-slate-300">
-              <WalletIcon size={14} className="text-[#C084FC]" />
-              <span className="text-[10px] uppercase tracking-widest font-bold">{str.balance}</span>
-            </div>
-            <button
-              onClick={() => { playSound("select"); setActiveTab("wallet"); }}
-              className="flex items-center gap-1 text-[11px] font-bold text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/20 px-3 py-1.5 rounded-full hover:bg-[#22D3EE]/20 active:scale-95 transition-all"
-            >
-              <Coins size={13} />
-              {str.topUp}
-            </button>
-          </div>
-
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-mono text-white tracking-tight">
-              {Number(wallet?.totalBalance || 0).toFixed(2)}
-            </span>
-            <span className="text-sm font-bold text-[#22D3EE]">{wallet?.currency ?? "ETB"}</span>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-black/40 border border-white/5 p-2.5">
-              <div className="text-[10px] text-slate-400">{str.playBal}</div>
-              <div className="text-sm font-extrabold text-[#C084FC] font-mono">
-                {Number(wallet?.playBalance || 0).toFixed(2)}
-              </div>
-            </div>
-            <div className="rounded-xl bg-black/40 border border-white/5 p-2.5">
-              <div className="text-[10px] text-slate-400">{str.mainBal}</div>
-              <div className="text-sm font-extrabold text-[#22D3EE] font-mono">
-                {Number(wallet?.mainBalance || 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Active classic round banner */}
+      {/* 2. Active classic round banner */}
       {roundData && (
         <div className="glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between gap-3">
           <div className="min-w-0">

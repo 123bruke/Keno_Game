@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAppStore } from "../lib/store";
 import { playSound } from "../lib/sound";
-import { Globe, Volume2, VolumeX, Smartphone, ChevronLeft, HelpCircle, ChevronRight } from "lucide-react";
+import { Globe, Volume2, VolumeX, Smartphone, ChevronLeft, HelpCircle, ChevronRight, Lock, Clock, ShieldCheck, Sparkles } from "lucide-react";
 
 export default function Settings() {
   const {
@@ -119,6 +119,49 @@ export default function Settings() {
             <div className={`w-4 h-4 rounded-full ${vibrationEnabled ? "bg-black" : "bg-slate-500"}`} />
           </button>
         </div>
+      </div>
+
+      <div className="glass-card rounded-2xl p-4 space-y-2 border border-white/10">
+        <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
+          <Sparkles size={12} className="text-emerald-400" />
+          {language === "am" ? "የፍትሃዊነት ማረጋገጫ እንዴት ይሰራል?" : "How Fairness Verification Works"}
+        </div>
+        {[
+          {
+            icon: Lock,
+            title: language === "am" ? "1. ቁርጠኝነት" : "1. Commit",
+            desc: language === "am"
+              ? "ከጨዋታው በፊት የሰርቨር ሴድ SHA-256 ሃሽ ይታተማል።"
+              : "Before the draw, a SHA-256 hash of the server seed is published.",
+            color: "text-[#C084FC] bg-[#C084FC]/10",
+          },
+          {
+            icon: Clock,
+            title: language === "am" ? "2. ጨዋታ" : "2. Play",
+            desc: language === "am"
+              ? "የደንበኛ ሴድዎ ከሰርቨር ሴድ ጋር በHMAC-SHA256 ተደምሮ ውጤቱን ይወስናል።"
+              : "Your client seed is combined with the server seed via HMAC-SHA256 to determine the draw.",
+            color: "text-[#22D3EE] bg-[#22D3EE]/10",
+          },
+          {
+            icon: ShieldCheck,
+            title: language === "am" ? "3. ማረጋገጥ" : "3. Verify",
+            desc: language === "am"
+              ? "ከዙሩ ማብቂያ በኋላ የሰርቨር ሴድ ይገለጻል፤ በዚህም ውጤቱን በራስዎ ማረጋገጥ ይችላሉ።"
+              : "After the draw, the server seed is revealed so you can verify the result yourself.",
+            color: "text-emerald-400 bg-emerald-500/10",
+          },
+        ].map(({ icon: Icon, title, desc, color }) => (
+          <div key={title} className="flex items-center gap-3 py-2 border-b border-white/5 last:border-0">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${color}`}>
+              <Icon size={16} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-xs font-extrabold text-white leading-tight">{title}</div>
+              <div className="text-[10px] text-slate-400 mt-0.5 leading-snug">{desc}</div>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="glass-card rounded-2xl p-4 space-y-2 border border-white/10">
