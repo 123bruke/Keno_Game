@@ -14,6 +14,9 @@ import { TicketAcceptedDto } from "../dtos/game/ticket-accepted.dto";
 import { TicketSettledDto } from "../dtos/game/ticket-settled.dto";
 import { GameSettledDto } from "../dtos/game/game-settled.dto";
 
+import { SOCKET_EVENTS } from "../socket/events";
+import { emitBroadcast, emitToUser } from "../socket/socket";
+
 export class GameEngineService {
   private wallet = new WalletService();
   private ticket = new TicketService();
@@ -182,12 +185,21 @@ export class GameEngineService {
   }
 
   async settle(gameId: string): Promise<GameSettledDto> {
-    return prisma.$transaction(async (tx) => {
+    const pendingGame = await this.game.getById(gameId);
+    if (pendingGame) {
+      emitBroadcast(SOCKET_EVENTS.GAME_STARTED, {
+        gameId,
+        roundNumber: pendingGame.roundNumber,
+      });
+    }
+
+    const { result, byUser } = await prisma.$transaction(async (tx) => {
       const drawNumbers = await this.fairness.drawFor(gameId);
       const game = await this.game.startDraw(tx, gameId);
       const tickets = await this.ticket.getByGame(tx, gameId);
 
       const settledTickets: TicketSettledDto[] = [];
+      const byUser = new Map<string, TicketSettledDto[]>();
       let totalPayout = 0;
 
       for (const t of tickets) {
@@ -217,7 +229,7 @@ export class GameEngineService {
           totalPayout += payout;
         }
 
-        settledTickets.push({
+        const settledTicket: TicketSettledDto = {
           ticketId: t.id,
           selectedNumbers: selected,
           drawNumbers,
@@ -226,7 +238,13 @@ export class GameEngineService {
           betAmount: Number(t.betAmount),
           payout,
           won: payout > 0,
-        });
+        };
+
+        settledTickets.push(settledTicket);
+
+        const userTickets = byUser.get(t.userId) ?? [];
+        userTickets.push(settledTicket);
+        byUser.set(t.userId, userTickets);
       }
 
       await this.game.finish(tx, gameId, drawNumbers);
@@ -234,16 +252,54 @@ export class GameEngineService {
       const fairnessRecord = await this.fairness.getRecord(gameId);
 
       return {
-        gameId: game.id,
-        roundNumber: game.roundNumber,
-        drawNumbers,
-        totalTickets: tickets.length,
-        settledTickets,
-        totalPayout,
-        serverSeed: fairnessRecord?.serverSeed,
-        serverSeedHash: fairnessRecord?.serverSeedHash,
+        result: {
+          gameId: game.id,
+          roundNumber: game.roundNumber,
+          drawNumbers,
+          totalTickets: tickets.length,
+          settledTickets,
+          totalPayout,
+          serverSeed: fairnessRecord?.serverSeed,
+          serverSeedHash: fairnessRecord?.serverSeedHash,
+        },
+        byUser,
       };
     });
+
+    // Broadcast the public winning numbers so every connected client sees
+    // the classic draw live (feeds the countdown + results feed).
+    emitBroadcast(SOCKET_EVENTS.DRAW_NUMBERS, {
+      gameId: result.gameId,
+      roundNumber: result.roundNumber,
+      drawNumbers: result.drawNumbers,
+    });
+
+    // Personalized live reveal + wallet sync for every player with a ticket.
+    for (const [userId, userTickets] of byUser.entries()) {
+      const playerPayout = userTickets.reduce((sum, t) => sum + t.payout, 0);
+
+      emitToUser(userId, SOCKET_EVENTS.GAME_SETTLED, {
+        gameId: result.gameId,
+        roundNumber: result.roundNumber,
+        drawNumbers: result.drawNumbers,
+        totalTickets: result.totalTickets,
+        totalPayout: result.totalPayout,
+        serverSeed: result.serverSeed,
+        serverSeedHash: result.serverSeedHash,
+        tickets: userTickets,
+        playerPayout,
+      });
+
+      const wallet = await prisma.wallet.findUnique({ where: { userId } });
+      if (wallet) {
+        emitToUser(userId, SOCKET_EVENTS.WALLET_UPDATED, {
+          balance: Number(wallet.mainBalance),
+          playBalance: Number(wallet.playBalance),
+        });
+      }
+    }
+
+    return result;
   }
 }
 

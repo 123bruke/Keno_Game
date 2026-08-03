@@ -3,6 +3,7 @@ import { GameEngineService } from "../services/game.service.engine";
 import { GameService } from "../services/game.service";
 import { TicketService } from "../services/ticket.service";
 import { FairnessService } from "../services/fairness.service";
+import { SettingsRepository } from "../repositories/settings.repository";
 import prisma from "../config/prisma";
 import { PlayGameSchema } from "../dtos/game/play-game.dto";
 import { success } from "../utils/response";
@@ -20,6 +21,7 @@ export class GameController {
   private gameService = new GameService();
   private ticketService = new TicketService();
   private fairnessService = new FairnessService();
+  private settingsRepo = new SettingsRepository();
 
   play = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -43,12 +45,15 @@ export class GameController {
         fairness = await prisma.$transaction((tx) => this.fairnessService.commit(tx, game.id));
       }
 
+      const settings = await this.settingsRepo.getSettings();
+
       return success(res, {
         gameId: game.id,
         roundNumber: game.roundNumber,
         mode: game.mode,
         status: game.status,
         startedAt: game.startedAt,
+        drawIntervalSec: Number(settings.drawIntervalSec) || 30,
         serverSeedHash: fairness.serverSeedHash,
         clientSeed: fairness.clientSeed,
         nonce: fairness.nonce,
