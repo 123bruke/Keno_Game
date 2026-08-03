@@ -142,6 +142,7 @@ export interface CurrentRound {
   mode: string;
   status: string;
   startedAt: string;
+  drawIntervalSec?: number;
   serverSeedHash?: string;
   clientSeed?: string;
   nonce?: number;

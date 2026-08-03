@@ -1,8 +1,15 @@
 import { create } from "zustand";
+import type { LiveSettledEvent } from "./socket";
 
 export type Tab = "home" | "game" | "history" | "wallet" | "fair" | "profile" | "admin" | "settings";
 export type GameMode = "INSTANT" | "CLASSIC";
 export type Language = "am" | "en";
+
+export interface PendingClassic {
+  gameId: string;
+  roundNumber: number;
+  ticketCount: number;
+}
 
 export interface AuthUser {
   id: string;
@@ -39,6 +46,15 @@ interface AppState {
   toggleVibration: () => void;
   clientSeed: string;
   setClientSeed: (seed: string) => void;
+  // Classic round the player is waiting on (set when a ticket is accepted).
+  pendingClassic: PendingClassic | null;
+  setPendingClassic: (pending: PendingClassic | null) => void;
+  // Latest live classic settlement pushed over the socket.
+  liveSettled: LiveSettledEvent | null;
+  setLiveSettled: (evt: LiveSettledEvent | null) => void;
+  // True while a classic round is being drawn (broadcast via socket).
+  classicDrawing: boolean;
+  setClassicDrawing: (drawing: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -74,4 +90,10 @@ export const useAppStore = create<AppState>((set) => ({
   toggleVibration: () => set((s) => ({ vibrationEnabled: !s.vibrationEnabled })),
   clientSeed: "keno_player_seed_777",
   setClientSeed: (seed) => set({ clientSeed: seed }),
+  pendingClassic: null,
+  setPendingClassic: (pending) => set({ pendingClassic: pending }),
+  liveSettled: null,
+  setLiveSettled: (evt) => set({ liveSettled: evt }),
+  classicDrawing: false,
+  setClassicDrawing: (drawing) => set({ classicDrawing: drawing }),
 }));
