@@ -27,10 +27,20 @@ export default function Profile() {
   const [customSeed, setCustomSeed] = useState(clientSeed);
   const [seedSavedMsg, setSeedSavedMsg] = useState("");
 
-  const totalGames = Number(historyData?.total || historyData?.history?.length || 0);
-  const winnings = Number(historyData?.totalWinnings || 0);
-  const bets = Number(historyData?.totalBets || 0);
-  const winRate = totalGames > 0 ? Math.min(100, Math.round((winnings / Math.max(1, bets)) * 100)) : 0;
+  const historyItems: any[] = Array.isArray(historyData?.items)
+    ? historyData.items
+    : Array.isArray(historyData?.history)
+      ? historyData.history
+      : [];
+  const totalGames = Number(historyData?.total || historyItems.length || 0);
+  const winnings = historyData?.totalWinnings != null
+    ? Number(historyData.totalWinnings)
+    : historyItems.reduce((sum, t) => sum + Number(t.payout || 0), 0);
+  const bets = historyData?.totalBets != null
+    ? Number(historyData.totalBets)
+    : historyItems.reduce((sum, t) => sum + Number(t.betAmount || 0), 0);
+  const wonCount = historyItems.filter((t) => t.status === "WON").length;
+  const winRate = totalGames > 0 ? Math.round((wonCount / totalGames) * 100) : 0;
 
   const handleGenerateRandomSeed = () => {
     const randomSeed = "seed_" + Math.random().toString(36).substring(2, 12);
