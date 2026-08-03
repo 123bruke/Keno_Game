@@ -86,7 +86,7 @@ export class WithdrawalService {
         const { getBot } = await import("../../bot/bot.service");
         const bot = getBot();
         const admins = await prisma.user.findMany({
-          where: { role: Role.ADMIN },
+          where: { role: { in: [Role.ADMIN, Role.SUPERADMIN] } },
           select: { telegramId: true },
         });
         const name = user.firstName || user.username || String(user.telegramId);
