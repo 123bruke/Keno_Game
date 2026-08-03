@@ -28,6 +28,12 @@ body {
   min-height: 100dvh;
 }
 
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+select:not(:disabled) {
+  cursor: pointer;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

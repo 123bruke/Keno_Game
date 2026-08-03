@@ -111,7 +111,7 @@ export default function Home() {
 
         <button
           onClick={() => { playSound("select"); setActiveTab("settings"); }}
-          className="p-2.5 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-95 transition-all"
+          className="p-2.5 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-95 transition-all cursor-pointer"
           aria-label={str.settings}
         >
           <Settings size={18} />
@@ -134,7 +134,7 @@ export default function Home() {
           </div>
           <button
             onClick={() => { playSound("select"); setGameMode("CLASSIC"); handleEnterGame(); }}
-            className="flex items-center gap-1 shrink-0 text-[11px] font-bold text-black bg-gradient-to-r from-[#C084FC] to-[#22D3EE] px-3.5 py-2 rounded-xl hover:opacity-90 active:scale-95 transition-all"
+            className="flex items-center gap-1 shrink-0 text-[11px] font-bold text-black bg-gradient-to-r from-[#C084FC] to-[#22D3EE] px-3.5 py-2 rounded-xl hover:opacity-90 active:scale-95 transition-all cursor-pointer"
           >
             {isAm ? "ይጫወቱ" : "Play"} <ChevronRight size={14} />
           </button>
@@ -150,7 +150,7 @@ export default function Home() {
           </div>
           <button
             onClick={() => { playSound("click"); setActiveTab("history"); }}
-            className="text-[11px] font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-0.5"
+            className="text-[11px] font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-0.5 cursor-pointer"
           >
             {isAm ? "ታሪክ" : "History"} <ChevronRight size={13} />
           </button>
@@ -241,7 +241,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => adjustBet(-STEP)}
-            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0 cursor-pointer"
             aria-label="-"
           >
             <Minus size={16} />
@@ -257,14 +257,14 @@ export default function Home() {
           />
           <button
             onClick={() => adjustBet(STEP)}
-            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0 cursor-pointer"
             aria-label="+"
           >
             <Plus size={16} />
           </button>
           <button
             onClick={() => { playSound("click"); setBetAmount(maxBet); }}
-            className="h-10 px-3.5 rounded-xl bg-gradient-to-r from-[#C084FC]/20 to-[#22D3EE]/20 border border-[#C084FC]/30 text-[#C084FC] text-xs font-black hover:opacity-90 active:scale-95 transition-all shrink-0"
+            className="h-10 px-3.5 rounded-xl bg-gradient-to-r from-[#C084FC]/20 to-[#22D3EE]/20 border border-[#C084FC]/30 text-[#C084FC] text-xs font-black hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer"
           >
             {str.max}
           </button>
@@ -275,7 +275,7 @@ export default function Home() {
             <button
               key={p}
               onClick={() => { playSound(); setBetAmount(p); }}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 betAmount === p
                   ? "bg-gradient-to-r from-[#C084FC] to-[#22D3EE] text-black shadow-lg shadow-[#C084FC]/25 scale-[1.03]"
                   : "bg-[#12121c] text-slate-300 hover:bg-[#1a1a2e]"
@@ -290,12 +290,12 @@ export default function Home() {
       {/* 6. CTA */}
       <button
         onClick={() => { playSound('success'); handleEnterGame(); }}
-        className="relative w-full py-4 rounded-2xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-black text-lg shadow-2xl shadow-[#C084FC]/30 transition-all hover:scale-[1.01] hover:shadow-[#22D3EE]/30 active:scale-[0.99] flex items-center justify-center gap-2 overflow-hidden"
+        className="relative w-full mt-2 py-3 rounded-2xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-black text-base shadow-2xl shadow-[#C084FC]/30 transition-all hover:scale-[1.01] hover:shadow-[#22D3EE]/30 active:scale-[0.99] flex items-center justify-center gap-2 overflow-hidden cursor-pointer"
       >
         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />
-        <Flame size={22} className="fill-black" />
+        <Flame size={18} className="fill-black" />
         {selectedNumbers.length > 0 ? str.enterWith : str.goBoard}
-        <ArrowRight size={22} />
+        <ArrowRight size={18} />
       </button>
     </div>
   );
