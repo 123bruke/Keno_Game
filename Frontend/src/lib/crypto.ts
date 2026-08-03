@@ -1,11 +1,3 @@
-function hexToBytes(hex: string): Uint8Array {
-  const bytes = new Uint8Array(hex.length / 2);
-  for (let i = 0; i < hex.length; i += 2) {
-    bytes[i / 2] = parseInt(hex.substring(i, i + 2), 16);
-  }
-  return bytes;
-}
-
 function bytesToHex(bytes: Uint8Array): string {
   return Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join('');
 }
@@ -16,11 +8,11 @@ export async function sha256(input: string): Promise<string> {
   return bytesToHex(new Uint8Array(hash));
 }
 
-export async function hmacSha256(keyHex: string, message: string): Promise<string> {
-  const keyBytes = hexToBytes(keyHex);
-  const key = await crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+export async function hmacSha256(key: string, message: string): Promise<string> {
+  const keyBytes = new TextEncoder().encode(key);
+  const cryptoKey = await crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
   const data = new TextEncoder().encode(message);
-  const sig = await crypto.subtle.sign("HMAC", key, data);
+  const sig = await crypto.subtle.sign("HMAC", cryptoKey, data);
   return bytesToHex(new Uint8Array(sig));
 }
 
