@@ -18,6 +18,20 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// If the backend rejects our token (expired/invalid/secret rotated),
+// clear it so the NEXT request goes through ensureAuth() and re-logs in
+// via Telegram instead of retrying with the same dead token forever.
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem("keno_token");
+      localStorage.removeItem("keno_user");
+    }
+    return Promise.reject(error);
+  }
+);
+
 const saveAuth = (data: { token: string; user: any }) => {
   localStorage.setItem("keno_token", data.token);
   if (data.user) {
