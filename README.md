@@ -48,6 +48,7 @@ A full-stack, production-grade Keno casino game built for the Ethiopian market w
 ## ✨ Features
 
 ### 🎮 Gameplay
+
 - **Two game modes** — **Instant** (immediate draw + payout) and **Classic** (scheduled multiplayer rounds every 30s).
 - Pick **1–10 numbers** from a **1–80** pool; **20 numbers** are drawn per round.
 - **Quick Pick** presets (3/5/7/10) and a full wager selector with presets, stepper, and Max.
@@ -56,12 +57,14 @@ A full-stack, production-grade Keno casino game built for the Ethiopian market w
 - Up to **100,000× jackpot** on a 10/10 hit.
 
 ### 🔐 Provably Fair
-- Server commits a **SHA-256 hash** of its seed *before* each round.
+
+- Server commits a **SHA-256 hash** of its seed _before_ each round.
 - Draws are derived with **HMAC-SHA256(serverSeed, `${clientSeed}:${nonce}:${counter}`)**.
 - Seeds are revealed after settlement and verifiable **in-app** (auto or manual) or **offline**.
 - Player-controlled **client seed** + copy-to-clipboard verification.
 
 ### 💳 Payments (Ethiopian market)
+
 - **Telebirr** deposits with automatic SMS / reference / screenshot verification (OCR).
 - **CBE** and **Telebirr** withdrawal destinations with admin approval.
 - Dual-wallet model: **Play balance** (deposits/bets) vs **Main balance** (wins/withdrawals).
@@ -69,11 +72,13 @@ A full-stack, production-grade Keno casino game built for the Ethiopian market w
 - Player-to-player **transfers** and **referral bonuses**.
 
 ### 🌐 Bilingual & Polished UI
+
 - Full **Amharic 🇪🇹 / English 🇬🇧** switchable UI.
 - Dark neon design system (purple/cyan), glassmorphism cards, haptic vibration & Web Audio SFX.
 - **Admin Portal** — live analytics, editable payout table, game settings, user management, reports.
 
 ### 🛡️ Security & Ops
+
 - JWT auth (7-day sessions) shared across REST API, WebSocket, and Mini App.
 - Authenticated socket connections, Redis rate limiting, and withdrawal double-processing locks.
 - Zod input validation, role-based access (USER / ADMIN / SUPERADMIN).
@@ -82,12 +87,12 @@ A full-stack, production-grade Keno casino game built for the Ethiopian market w
 
 ## 🎮 Game Modes
 
-| | ⚡ **Instant Keno** | 🕒 **Classic Round** |
-|---|---|---|
-| Draw | Immediate, settled in the play request | Scheduled, every **30 seconds** |
-| Payout | Instant | At end of the round |
-| Fairness | Full seed revealed immediately in the result | Seed revealed after the round settles |
-| Style | Single player, fast | Multiplayer, live countdown + socket reveal |
+|          | ⚡ **Instant Keno**                          | 🕒 **Classic Round**                        |
+| -------- | -------------------------------------------- | ------------------------------------------- |
+| Draw     | Immediate, settled in the play request       | Scheduled, every **30 seconds**             |
+| Payout   | Instant                                      | At end of the round                         |
+| Fairness | Full seed revealed immediately in the result | Seed revealed after the round settles       |
+| Style    | Single player, fast                          | Multiplayer, live countdown + socket reveal |
 
 ---
 
@@ -95,7 +100,7 @@ A full-stack, production-grade Keno casino game built for the Ethiopian market w
 
 1. **Pick your numbers** — tap **1 to 10** balls from the 1–80 grid.
 2. **Set your wager** — use the stepper, presets, or type a custom amount.
-3. **Choose a mode** — *Instant* for an immediate result, or *Classic* to queue a ticket into the live round.
+3. **Choose a mode** — _Instant_ for an immediate result, or _Classic_ to queue a ticket into the live round.
 4. **Play** — 20 numbers are drawn. Matches turn **green**.
 5. **Win** — payout = `bet × multiplier` (see [payout table](#-payout-table)). Wins go to your **Main balance**.
 6. **Verify** — open the **Fairness** tab after any round to confirm the draw was honest.
@@ -122,20 +127,20 @@ You can verify **in the app** (Auto tab picks a completed round; Manual tab past
 
 ## 💰 Payout Table
 
-Multiplier applied to your bet, keyed by *numbers picked* → *numbers matched*:
+Multiplier applied to your bet, keyed by _numbers picked_ → _numbers matched_:
 
-| Picks | Matches → Multiplier |
-|---|---|
-| 1 | `1 → 3.8` |
-| 2 | `2 → 15` |
-| 3 | `2 → 2` · `3 → 42` |
-| 4 | `2 → 1` · `3 → 10` · `4 → 100` |
-| 5 | `3 → 2` · `4 → 15` · `5 → 300` |
-| 6 | `3 → 1` · `4 → 7` · `5 → 70` · `6 → 1000` |
-| 7 | `4 → 3` · `5 → 20` · `6 → 200` · `7 → 4000` |
-| 8 | `4 → 2` · `5 → 10` · `6 → 90` · `7 → 750` · `8 → 10000` |
-| 9 | `5 → 5` · `6 → 40` · `7 → 300` · `8 → 2500` · `9 → 25000` |
-| 10 | `0 → 2` · `5 → 2` · `6 → 15` · `7 → 100` · `8 → 500` · `9 → 3000` · `10 → 100000` |
+| Picks | Matches → Multiplier                                                              |
+| ----- | --------------------------------------------------------------------------------- |
+| 1     | `1 → 3.8`                                                                         |
+| 2     | `2 → 15`                                                                          |
+| 3     | `2 → 2` · `3 → 42`                                                                |
+| 4     | `2 → 1` · `3 → 10` · `4 → 100`                                                    |
+| 5     | `3 → 2` · `4 → 15` · `5 → 300`                                                    |
+| 6     | `3 → 1` · `4 → 7` · `5 → 70` · `6 → 1000`                                         |
+| 7     | `4 → 3` · `5 → 20` · `6 → 200` · `7 → 4000`                                       |
+| 8     | `4 → 2` · `5 → 10` · `6 → 90` · `7 → 750` · `8 → 10000`                           |
+| 9     | `5 → 5` · `6 → 40` · `7 → 300` · `8 → 2500` · `9 → 25000`                         |
+| 10    | `0 → 2` · `5 → 2` · `6 → 15` · `7 → 100` · `8 → 500` · `9 → 3000` · `10 → 100000` |
 
 > Target **RTP 95%** · House edge **5%** · Bet range **1 – 10,000 ETB**.
 > The whole table and limits are editable live from the **Admin Portal**.
@@ -145,27 +150,29 @@ Multiplier applied to your bet, keyed by *numbers picked* → *numbers matched*:
 ## 🧱 Tech Stack
 
 ### Backend (`/Backend`)
-| Layer | Technology |
-|---|---|
-| Runtime | Node.js 20+, TypeScript 5.8 |
-| API | Express 5, Zod validation |
-| Database | PostgreSQL via Prisma 6 |
-| Realtime | Socket.IO 4 (JWT-authenticated) |
-| Cache / Locks | Redis (`ioredis`) with graceful fallback |
-| Bot | `node-telegram-bot-api` (polling or webhook) |
-| Scheduler | `node-cron` (classic rounds every 30s) |
-| Payments | Telebirr verification API + manual admin approval |
+
+| Layer         | Technology                                        |
+| ------------- | ------------------------------------------------- |
+| Runtime       | Node.js 20+, TypeScript 5.8                       |
+| API           | Express 5, Zod validation                         |
+| Database      | PostgreSQL via Prisma 6                           |
+| Realtime      | Socket.IO 4 (JWT-authenticated)                   |
+| Cache / Locks | Redis (`ioredis`) with graceful fallback          |
+| Bot           | `node-telegram-bot-api` (polling or webhook)      |
+| Scheduler     | `node-cron` (classic rounds every 30s)            |
+| Payments      | Telebirr verification API + manual admin approval |
 
 ### Frontend (`/Frontend`)
-| Layer | Technology |
-|---|---|
-| UI | React 19, TypeScript, Tailwind CSS v4 |
-| Build | Vite 6 |
-| State | Zustand 5 |
-| Data fetching | TanStack Query 5 + Axios |
-| Realtime | `socket.io-client` |
-| Animation | Motion (Framer Motion) + Web Audio SFX |
-| Runtime | Express server (static + `/api` proxy) |
+
+| Layer         | Technology                             |
+| ------------- | -------------------------------------- |
+| UI            | React 19, TypeScript, Tailwind CSS v4  |
+| Build         | Vite 6                                 |
+| State         | Zustand 5                              |
+| Data fetching | TanStack Query 5 + Axios               |
+| Realtime      | `socket.io-client`                     |
+| Animation     | Motion (Framer Motion) + Web Audio SFX |
+| Runtime       | Express server (static + `/api` proxy) |
 
 ---
 
@@ -269,31 +276,31 @@ Open the frontend URL, or point your Telegram bot's Mini App button at it
 
 ### Backend
 
-| Variable | Required | Description |
-|---|---|---|
-| `DATABASE_URL` | ✅ | PostgreSQL connection string |
-| `JWT_SECRET` | ✅ | Secret for signing JWTs (7-day expiry) |
-| `BOT_TOKEN` | ✅ | Telegram bot token (empty disables the bot) |
-| `PORT` | — | HTTP port (default `5000`) |
-| `NODE_ENV` | — | `development` / `production` (gates `/auth/dev-login`) |
-| `REDIS_URL` | — | Redis connection (default `redis://localhost:6379`) |
-| `BOT_WEBHOOK_URL` | — | If set, the bot runs in webhook mode (`<url>/api/bot/webhook`) |
-| `WEBAPP_URL` | — | Mini-App URL used by the bot's Play button |
-| `TELEGRAM_BOT_TOKEN` | — | Token used to verify Telegram web-app login hashes |
-| `CORS_ORIGINS` | — | Comma-separated allowed Socket.IO origins (default `*`) |
-| `VERIFY_API_BASE_URL` | — | External Telebirr verification API base |
-| `LEUL_API_KEY` | — | API key for the Telebirr verification service |
-| `SMS_WEBHOOK_SECRET` | — | Secret guarding the Telebirr SMS webhook |
-| `MERCHANT_PHONE` | — | Telebirr merchant number deposits are sent to |
+| Variable              | Required | Description                                                    |
+| --------------------- | -------- | -------------------------------------------------------------- |
+| `DATABASE_URL`        | ✅       | PostgreSQL connection string                                   |
+| `JWT_SECRET`          | ✅       | Secret for signing JWTs (7-day expiry)                         |
+| `BOT_TOKEN`           | ✅       | Telegram bot token (empty disables the bot)                    |
+| `PORT`                | —        | HTTP port (default `5000`)                                     |
+| `NODE_ENV`            | —        | `development` / `production` (gates `/auth/dev-login`)         |
+| `REDIS_URL`           | —        | Redis connection (default `redis://localhost:6379`)            |
+| `BOT_WEBHOOK_URL`     | —        | If set, the bot runs in webhook mode (`<url>/api/bot/webhook`) |
+| `WEBAPP_URL`          | —        | Mini-App URL used by the bot's Play button                     |
+| `TELEGRAM_BOT_TOKEN`  | —        | Token used to verify Telegram web-app login hashes             |
+| `CORS_ORIGINS`        | —        | Comma-separated allowed Socket.IO origins (default `*`)        |
+| `VERIFY_API_BASE_URL` | —        | External Telebirr verification API base                        |
+| `LEUL_API_KEY`        | —        | API key for the Telebirr verification service                  |
+| `SMS_WEBHOOK_SECRET`  | —        | Secret guarding the Telebirr SMS webhook                       |
+| `MERCHANT_PHONE`      | —        | Telebirr merchant number deposits are sent to                  |
 
 ### Frontend
 
-| Variable | Required | Description |
-|---|---|---|
-| `VITE_API_BASE_URL` | — | Backend API + socket URL (default `http://localhost:5000`) |
-| `BACKEND_URL` | — | Proxy target for the runtime Express server (default `http://localhost:5000`) |
-| `PORT` | — | Runtime server port (default `3000`) |
-| `DISABLE_HMR` | — | Disable HMR/file-watching (CI/editor use) |
+| Variable            | Required | Description                                                                   |
+| ------------------- | -------- | ----------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL` | —        | Backend API + socket URL (default `http://localhost:5000`)                    |
+| `BACKEND_URL`       | —        | Proxy target for the runtime Express server (default `http://localhost:5000`) |
+| `PORT`              | —        | Runtime server port (default `3000`)                                          |
+| `DISABLE_HMR`       | —        | Disable HMR/file-watching (CI/editor use)                                     |
 
 ---
 
@@ -356,29 +363,29 @@ Keno-Game/
 
 All endpoints are prefixed with the API base (`http://localhost:5000`).
 
-| Method | Path | Description | Auth |
-|---|---|---|---|
-| `POST` | `/auth/telegram` | Telegram login → user + JWT | — |
-| `POST` | `/auth/dev-login` | Dev-only login (development mode) | — |
-| `GET` | `/wallet` | Current wallet (play + main + total) | ✅ |
-| `GET` | `/wallet/transactions` | Paginated transactions | ✅ |
-| `POST` | `/wallet/deposit` | Credit play balance | ✅ |
-| `POST` | `/wallet/withdraw` | Debit main balance | ✅ |
-| `POST` | `/games/keno/play` | Play Instant/Classic (rate-limited) | ✅ |
-| `GET` | `/games/keno/current` | Current classic round + committed seed hash | ✅ |
-| `GET` | `/games/keno/result/:id` | Game / ticket result | ✅ |
-| `GET` | `/games/keno/history` | Paginated user tickets | ✅ |
-| `GET` | `/games/keno/provably-fair` | Verify a draw / lookup by gameId | ✅ |
-| `GET` | `/games/keno/settled-games` | Last 10 settled games | ✅ |
-| `GET` | `/games/keno/quick-pick` | Random numbers (`?count=`) | — |
-| `POST` | `/games/keno/settle` | Force-settle a game | ✅ |
-| `GET` | `/admin/settings` | Game settings & payout table | Admin |
-| `PUT` | `/admin/settings` | Update settings | Admin |
-| `GET` | `/admin/analytics` | Financial analytics | Admin |
-| `GET` | `/admin/users` | Paginated users + search | Admin |
-| `PATCH` | `/admin/users/:id/status` | Suspend / activate | Admin |
-| `PATCH` | `/admin/users/:id/role` | Change role | Superadmin |
-| `GET` | `/admin/reports` | Daily stats, popular numbers | Admin |
+| Method  | Path                        | Description                                 | Auth       |
+| ------- | --------------------------- | ------------------------------------------- | ---------- |
+| `POST`  | `/auth/telegram`            | Telegram login → user + JWT                 | —          |
+| `POST`  | `/auth/dev-login`           | Dev-only login (development mode)           | —          |
+| `GET`   | `/wallet`                   | Current wallet (play + main + total)        | ✅         |
+| `GET`   | `/wallet/transactions`      | Paginated transactions                      | ✅         |
+| `POST`  | `/wallet/deposit`           | Credit play balance                         | ✅         |
+| `POST`  | `/wallet/withdraw`          | Debit main balance                          | ✅         |
+| `POST`  | `/games/keno/play`          | Play Instant/Classic (rate-limited)         | ✅         |
+| `GET`   | `/games/keno/current`       | Current classic round + committed seed hash | ✅         |
+| `GET`   | `/games/keno/result/:id`    | Game / ticket result                        | ✅         |
+| `GET`   | `/games/keno/history`       | Paginated user tickets                      | ✅         |
+| `GET`   | `/games/keno/provably-fair` | Verify a draw / lookup by gameId            | ✅         |
+| `GET`   | `/games/keno/settled-games` | Last 10 settled games                       | ✅         |
+| `GET`   | `/games/keno/quick-pick`    | Random numbers (`?count=`)                  | —          |
+| `POST`  | `/games/keno/settle`        | Force-settle a game                         | ✅         |
+| `GET`   | `/admin/settings`           | Game settings & payout table                | Admin      |
+| `PUT`   | `/admin/settings`           | Update settings                             | Admin      |
+| `GET`   | `/admin/analytics`          | Financial analytics                         | Admin      |
+| `GET`   | `/admin/users`              | Paginated users + search                    | Admin      |
+| `PATCH` | `/admin/users/:id/status`   | Suspend / activate                          | Admin      |
+| `PATCH` | `/admin/users/:id/role`     | Change role                                 | Superadmin |
+| `GET`   | `/admin/reports`            | Daily stats, popular numbers                | Admin      |
 
 **Mini App endpoints** (`telegramId`-based): `GET /wallet/balance`, `GET /wallet/history`,
 `GET /games/history`, `POST /wallet/deposit`, `POST /wallet/manual-deposit`,
@@ -390,14 +397,14 @@ All endpoints are prefixed with the API base (`http://localhost:5000`).
 
 Server → Client:
 
-| Event | Payload | Notes |
-|---|---|---|
-| `wallet:updated` | `{ balance, playBalance }` | Sent to a user's room on any balance change |
-| `game:started` | `{ gameId, roundNumber }` | A classic settlement began |
-| `draw:numbers` | `{ gameId, roundNumber, drawNumbers }` | Draw broadcast |
-| `game:settled` | `{ gameId, drawNumbers, serverSeed, serverSeedHash, tickets, playerPayout }` | Per-user settlement with revealed seed |
-| `deposit:new` | `{ type, userName, phone, amount }` | Admin room deposit/withdrawal alerts |
-| `withdrawal_settled` | `{ withdrawalId, status }` | Admin room approval outcome |
+| Event                | Payload                                                                      | Notes                                       |
+| -------------------- | ---------------------------------------------------------------------------- | ------------------------------------------- |
+| `wallet:updated`     | `{ balance, playBalance }`                                                   | Sent to a user's room on any balance change |
+| `game:started`       | `{ gameId, roundNumber }`                                                    | A classic settlement began                  |
+| `draw:numbers`       | `{ gameId, roundNumber, drawNumbers }`                                       | Draw broadcast                              |
+| `game:settled`       | `{ gameId, drawNumbers, serverSeed, serverSeedHash, tickets, playerPayout }` | Per-user settlement with revealed seed      |
+| `deposit:new`        | `{ type, userName, phone, amount }`                                          | Admin room deposit/withdrawal alerts        |
+| `withdrawal_settled` | `{ withdrawalId, status }`                                                   | Admin room approval outcome                 |
 
 Client → Server: `join_user_room`, `join_admin_room`, `disconnect`.
 
@@ -420,15 +427,18 @@ Commands: `/start` `/help` `/play` `/balance` `/deposit` `/withdraw` `/transfer`
 ## 🔌 Deployment
 
 ### Backend
+
 ```bash
 cd Backend
 npm run build          # tsc → dist/
 npm start              # node dist/server.js
 ```
+
 Run behind a reverse proxy (nginx/Caddy). Set `BOT_WEBHOOK_URL=https://your-domain/api/bot/webhook`
 and switch the bot to webhook mode for production.
 
 ### Frontend
+
 ```bash
 cd Frontend
 npm run build          # vite build + bundled server
@@ -436,13 +446,14 @@ npm start              # serves static SPA + /api proxy on :3000
 ```
 
 ### Suggested production stack
-| Piece | Suggested |
-|---|---|
-| Host | Any Node.js PaaS / VPS |
-| Database | Managed PostgreSQL |
-| Cache | Managed Redis |
-| Reverse proxy | nginx / Caddy with TLS |
-| Bot | Webhook mode behind TLS |
+
+| Piece         | Suggested               |
+| ------------- | ----------------------- |
+| Host          | Any Node.js PaaS / VPS  |
+| Database      | Managed PostgreSQL      |
+| Cache         | Managed Redis           |
+| Reverse proxy | nginx / Caddy with TLS  |
+| Bot           | Webhook mode behind TLS |
 
 ---
 
@@ -454,7 +465,7 @@ ISC © Shambel96 — see the `LICENSE` file for details.
 
 <div align="center">
 
-**Made with ❤️ for Ethiopian players — play fair, win big!**
+**Made for Ethiopian players — play fair, win big!**
 
 [⬆ Back to top](#-ኬኖ-keno)
 
