@@ -25,18 +25,45 @@ const saveAuth = (data: { token: string; user: any }) => {
   }
 };
 
+// Real Telegram user exposed by the WebApp SDK (bot "Play" deep link opens us here).
+export function getTelegramProfile(): {
+  telegramId: number;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  initData?: string;
+} | null {
+  try {
+    const tg = (window as any)?.Telegram?.WebApp;
+    if (!tg?.initDataUnsafe?.user?.id) return null;
+    tg.ready?.();
+    const user = tg.initDataUnsafe.user;
+    return {
+      telegramId: user.id,
+      username: user.username,
+      firstName: user.first_name,
+      lastName: user.last_name,
+      initData: tg.initData || undefined,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export const authApi = {
   loginTelegram: async (data: {
     telegramId: number | string;
     username?: string;
     firstName?: string;
     lastName?: string;
+    initData?: string;
   }) => {
     const res = await axios.post(`${API_BASE}/auth/telegram`, {
       telegramId: Number(data.telegramId),
       username: data.username || undefined,
       firstName: data.firstName || undefined,
       lastName: data.lastName || undefined,
+      initData: data.initData || undefined,
     });
 
     if (res.data.success && res.data.data.token) {
@@ -63,6 +90,29 @@ export const authApi = {
 // Auto authentication helper
 export async function ensureAuth(role: "USER" | "ADMIN" | "SUPERADMIN" = "USER") {
   const existingToken = localStorage.getItem("keno_token");
+  const telegram = getTelegramProfile();
+
+  // Real Telegram Mini App user: prefer their identity and drop any stale token
+  // from a different (e.g. default/dev) account so the bot-registered name shows.
+  if (telegram && role === "USER") {
+    const cached: any = (() => {
+      try {
+        return JSON.parse(localStorage.getItem("keno_user") || "null");
+      } catch {
+        return null;
+      }
+    })();
+    const sameUser = cached && Number(cached.telegramId) === telegram.telegramId;
+    if (!existingToken || !sameUser) {
+      try {
+        return (await authApi.loginTelegram(telegram)).token;
+      } catch (err) {
+        console.error("Telegram login failed:", err);
+      }
+    }
+    return existingToken;
+  }
+
   if (existingToken) return existingToken;
 
   try {
@@ -73,6 +123,7 @@ export async function ensureAuth(role: "USER" | "ADMIN" | "SUPERADMIN" = "USER")
         role: "ADMIN",
       })).token;
     }
+
     return (await authApi.loginTelegram({
       telegramId: 123456789,
       username: "player_one",

@@ -81,16 +81,16 @@ function AppContent() {
         setCurrentUser(parsed);
         setActiveTab(parsed.role === "ADMIN" || parsed.role === "SUPERADMIN" ? "admin" : "home");
       } catch {}
-    } else {
-      ensureAuth().then(() => {
-        const stored = localStorage.getItem("keno_user");
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          setCurrentUser(parsed);
-          setActiveTab(parsed.role === "ADMIN" || parsed.role === "SUPERADMIN" ? "admin" : "home");
-        }
-      });
     }
+    // Reconcile with the real Telegram user (replaces stale default/dev sessions)
+    ensureAuth().then(() => {
+      const stored = localStorage.getItem("keno_user");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        setCurrentUser(parsed);
+        setActiveTab(parsed.role === "ADMIN" || parsed.role === "SUPERADMIN" ? "admin" : "home");
+      }
+    });
   }, []);
 
   const handlePlay = () => {

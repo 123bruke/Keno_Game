@@ -39,7 +39,7 @@ export default function GameResult({
 
   const handleCopy = async () => {
     if (!fairness) return;
-    const text = `Server Seed: ${fairness.serverSeed}\nServer Seed Hash: ${fairness.serverSeedHash}\nClient Seed: ${fairness.clientSeed}\nNonce: ${fairness.nonce}`;
+    const text = `Server Seed: ${fairness.serverSeed}\nServer Seed Hash: ${fairness.serverSeedHash}`;
     try {
       await navigator.clipboard.writeText(text);
       setCopied(true);
@@ -172,14 +172,6 @@ export default function GameResult({
               <div className="flex items-start justify-between gap-3">
                 <span className="text-slate-500 shrink-0">{language === "am" ? "ሃሽ:" : "Hash:"}</span>
                 <span className="text-emerald-400 break-all text-right">{fairness.serverSeedHash}</span>
-              </div>
-              <div className="flex items-start justify-between gap-3">
-                <span className="text-slate-500 shrink-0">{language === "am" ? "ሴድ:" : "Client Seed:"}</span>
-                <span className="text-[#22D3EE] break-all text-right">{fairness.clientSeed}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-slate-500">Nonce:</span>
-                <span className="text-white">{fairness.nonce}</span>
               </div>
             </div>
             <button
