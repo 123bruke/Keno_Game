@@ -755,7 +755,7 @@ async function handleTextMessage(bot: Bot, msg: TelegramBot.Message) {
     await bot.sendMessage(
       chatId,
       lang === "am"
-        ? `ለመርዳት አልተረዳሁም። እባክዎ ከታች ካሉት አማራጮች ይምረጡ።`
+        ? `ይቅርታ፣ የላኩትን ትእዛዝ መረዳት አልቻልኩም። እባክዎ ከታች ካሉት አማራጮች ይምረጡ፤`
         : `I didn't understand that. Please choose an option below.`,
       { reply_markup: mainMenuKeyboard(lang) },
     );

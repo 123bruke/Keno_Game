@@ -9,6 +9,9 @@ import Home from "./components/Home";
 import KenoBoard from "./components/KenoBoard";
 import BetControls from "./components/BetControls";
 import GameResult from "./components/GameResult";
+import LiveReveal from "./components/LiveReveal";
+import LiveSocket from "./components/LiveSocket";
+import ClassicCountdown from "./components/ClassicCountdown";
 import Wallet from "./components/Wallet";
 import History from "./components/History";
 import ProvablyFair from "./components/ProvablyFair";
@@ -48,6 +51,7 @@ function AppContent() {
     currentUser,
     setCurrentUser,
     language,
+    setPendingClassic,
 
   } = useAppStore();
 
@@ -59,6 +63,14 @@ function AppContent() {
   const [gameResultData, setGameResultData] = useState<any>(null);
   const [drawWinning, setDrawWinning] = useState<number[]>([]);
   const [drawRevealed, setDrawRevealed] = useState(0);
+  const [toast, setToast] = useState<string | null>(null);
+
+  // Auto-dismiss toast notifications
+  useEffect(() => {
+    if (!toast) return;
+    const id = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(id);
+  }, [toast]);
 
   // Auto initialize auth on boot
   useEffect(() => {
@@ -101,8 +113,11 @@ function AppContent() {
               }
             }, 70);
           } else {
-            alert(language === "am" ? `ትኬት ለክላሲክ ዙር #${data.roundNumber} ተመዝግቧል!` : `Ticket accepted for Classic Round #${data.roundNumber}!`);
+            setPendingClassic({ gameId: data.gameId, roundNumber: data.roundNumber, ticketCount: 1 });
             clearSelection();
+            setToast(language === "am"
+              ? `ትኬት ለክላሲክ ዙር #${data.roundNumber} ተመዝግቧል! ውጤቱ በቀጥታ ይታያል`
+              : `Ticket accepted for Classic Round #${data.roundNumber}! Live result will appear shortly`);
           }
         },
         onError: (err: any) => {
@@ -149,6 +164,8 @@ function AppContent() {
                 {gameMode === "INSTANT" ? (language === "am" ? "ፈጣን ሁነታ" : "INSTANT MODE") : (language === "am" ? "ክላሲክ ሁነታ" : "CLASSIC MODE")}
               </span>
             </div>
+            {gameMode === "CLASSIC" && <ClassicCountdown compact />}
+            {gameMode === "CLASSIC" && <LiveReveal />}
             <KenoBoard winningNumbers={drawWinning} revealedCount={drawRevealed} />
             <BetControls onPlay={handlePlay} isPlaying={playMutation.isPending} />
           </div>
@@ -186,6 +203,18 @@ function AppContent() {
           })}
         </div>
       </nav>
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] w-[92%] max-w-md">
+          <div className="glass-card rounded-xl px-4 py-3 text-xs font-bold text-center text-white border border-[#22D3EE]/30 shadow-lg shadow-[#22D3EE]/10 animate-fade-in">
+            {toast}
+          </div>
+        </div>
+      )}
+
+      {/* Global socket layer (keeps wallet/history in sync across tabs) */}
+      <LiveSocket />
 
       {/* Modals */}
       {gameResultData && <GameResult result={gameResultData} onClose={() => setGameResultData(null)} />}

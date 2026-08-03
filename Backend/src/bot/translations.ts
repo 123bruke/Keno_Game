@@ -151,9 +151,7 @@ const am: Translation = {
 
   // ── Welcome / registration ──
   welcomeBack: (name) =>
-    `🎉 *እንኳን ደህና መጡ፣ ${name}* 👋\n\n` +
-    `🎱 ኬኖ ይጫወቱ፣ ብዙ ያሸንፉ!\n\n` +
-    `ለመጀመር ከታች ካሉት አማራጮች ይምረጡ።`,
+    `🎉 *እንኳን ደህና መጡ፣ ${name}* 👋 ለመጀመር ከታች ካሉት አማራጮች ይምረጡ።`,
 
   registerAskPhone:
     `📝 *መለያዎን ይመዝገቡ*\n\n` +
