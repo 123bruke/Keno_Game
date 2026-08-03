@@ -8,12 +8,10 @@ import {
   Flame,
   ArrowRight,
   Settings,
-  Coins,
   ChevronRight,
   Plus,
   Minus,
   Sparkles,
-  Wallet as WalletIcon,
   BadgeCheck,
 } from "lucide-react";
 
@@ -41,11 +39,6 @@ export default function Home() {
     greeting: isAm ? "እንኳን ደህና መጡ" : "Welcome Back",
     player: isAm ? "የኬኖ ተጫዋች" : "Keno Player",
     settings: isAm ? "ማስተካከያዎች" : "Settings",
-    balance: isAm ? "የኪስ ቦርሳ" : "Balance",
-    playBal: isAm ? "የጨዋታ ሂሳብ" : "Play Balance",
-    mainBal: isAm ? "ዋና ሂሳብ" : "Main Balance",
-    topUp: isAm ? "ገንዘብ ጨምር" : "Top Up",
-    manageWallet: isAm ? "ኪስ ቦርሳ" : "Wallet",
     activeRound: isAm ? "ንቁ የክላሲክ ዙር" : "Active Classic Round",
     round: (n: number) => (isAm ? `ዙር #${n}` : `Round #${n}`),
     selectMode: isAm ? "የጨዋታ ዓይነት ይምረጡ" : "Select Game Mode",
@@ -118,58 +111,14 @@ export default function Home() {
 
         <button
           onClick={() => { playSound("select"); setActiveTab("settings"); }}
-          className="p-2.5 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-95 transition-all"
+          className="p-2.5 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-95 transition-all cursor-pointer"
           aria-label={str.settings}
         >
           <Settings size={18} />
         </button>
       </div>
 
-      {/* 2. Balance card */}
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-[#1a0b2e] via-[#0a0a16] to-[#052631] p-5">
-        <div className="absolute -top-16 -right-16 w-48 h-48 bg-[#C084FC]/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-10 w-44 h-44 bg-[#22D3EE]/15 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-1.5 text-slate-300">
-              <WalletIcon size={14} className="text-[#C084FC]" />
-              <span className="text-[10px] uppercase tracking-widest font-bold">{str.balance}</span>
-            </div>
-            <button
-              onClick={() => { playSound("select"); setActiveTab("wallet"); }}
-              className="flex items-center gap-1 text-[11px] font-bold text-[#22D3EE] bg-[#22D3EE]/10 border border-[#22D3EE]/20 px-3 py-1.5 rounded-full hover:bg-[#22D3EE]/20 active:scale-95 transition-all"
-            >
-              <Coins size={13} />
-              {str.topUp}
-            </button>
-          </div>
-
-          <div className="flex items-baseline gap-2">
-            <span className="text-4xl font-black font-mono text-white tracking-tight">
-              {Number(wallet?.totalBalance || 0).toFixed(2)}
-            </span>
-            <span className="text-sm font-bold text-[#22D3EE]">{wallet?.currency ?? "ETB"}</span>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <div className="rounded-xl bg-black/40 border border-white/5 p-2.5">
-              <div className="text-[10px] text-slate-400">{str.playBal}</div>
-              <div className="text-sm font-extrabold text-[#C084FC] font-mono">
-                {Number(wallet?.playBalance || 0).toFixed(2)}
-              </div>
-            </div>
-            <div className="rounded-xl bg-black/40 border border-white/5 p-2.5">
-              <div className="text-[10px] text-slate-400">{str.mainBal}</div>
-              <div className="text-sm font-extrabold text-[#22D3EE] font-mono">
-                {Number(wallet?.mainBalance || 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Active classic round banner */}
+      {/* 2. Active classic round banner */}
       {roundData && (
         <div className="glass-card rounded-2xl p-4 border border-white/10 flex items-center justify-between gap-3">
           <div className="min-w-0">
@@ -185,7 +134,7 @@ export default function Home() {
           </div>
           <button
             onClick={() => { playSound("select"); setGameMode("CLASSIC"); handleEnterGame(); }}
-            className="flex items-center gap-1 shrink-0 text-[11px] font-bold text-black bg-gradient-to-r from-[#C084FC] to-[#22D3EE] px-3.5 py-2 rounded-xl hover:opacity-90 active:scale-95 transition-all"
+            className="flex items-center gap-1 shrink-0 text-[11px] font-bold text-black bg-gradient-to-r from-[#C084FC] to-[#22D3EE] px-3.5 py-2 rounded-xl hover:opacity-90 active:scale-95 transition-all cursor-pointer"
           >
             {isAm ? "ይጫወቱ" : "Play"} <ChevronRight size={14} />
           </button>
@@ -201,7 +150,7 @@ export default function Home() {
           </div>
           <button
             onClick={() => { playSound("click"); setActiveTab("history"); }}
-            className="text-[11px] font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-0.5"
+            className="text-[11px] font-bold text-slate-400 hover:text-white transition-colors flex items-center gap-0.5 cursor-pointer"
           >
             {isAm ? "ታሪክ" : "History"} <ChevronRight size={13} />
           </button>
@@ -292,7 +241,7 @@ export default function Home() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => adjustBet(-STEP)}
-            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0 cursor-pointer"
             aria-label="-"
           >
             <Minus size={16} />
@@ -308,14 +257,14 @@ export default function Home() {
           />
           <button
             onClick={() => adjustBet(STEP)}
-            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0"
+            className="w-10 h-10 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0 cursor-pointer"
             aria-label="+"
           >
             <Plus size={16} />
           </button>
           <button
             onClick={() => { playSound("click"); setBetAmount(maxBet); }}
-            className="h-10 px-3.5 rounded-xl bg-gradient-to-r from-[#C084FC]/20 to-[#22D3EE]/20 border border-[#C084FC]/30 text-[#C084FC] text-xs font-black hover:opacity-90 active:scale-95 transition-all shrink-0"
+            className="h-10 px-3.5 rounded-xl bg-gradient-to-r from-[#C084FC]/20 to-[#22D3EE]/20 border border-[#C084FC]/30 text-[#C084FC] text-xs font-black hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer"
           >
             {str.max}
           </button>
@@ -326,7 +275,7 @@ export default function Home() {
             <button
               key={p}
               onClick={() => { playSound(); setBetAmount(p); }}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 betAmount === p
                   ? "bg-gradient-to-r from-[#C084FC] to-[#22D3EE] text-black shadow-lg shadow-[#C084FC]/25 scale-[1.03]"
                   : "bg-[#12121c] text-slate-300 hover:bg-[#1a1a2e]"
@@ -341,12 +290,12 @@ export default function Home() {
       {/* 6. CTA */}
       <button
         onClick={() => { playSound('success'); handleEnterGame(); }}
-        className="relative w-full py-4 rounded-2xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-black text-lg shadow-2xl shadow-[#C084FC]/30 transition-all hover:scale-[1.01] hover:shadow-[#22D3EE]/30 active:scale-[0.99] flex items-center justify-center gap-2 overflow-hidden"
+        className="relative w-full mt-2 py-3 rounded-2xl bg-gradient-to-r from-[#C084FC] via-[#22D3EE] to-[#C084FC] text-black font-black text-base shadow-2xl shadow-[#C084FC]/30 transition-all hover:scale-[1.01] hover:shadow-[#22D3EE]/30 active:scale-[0.99] flex items-center justify-center gap-2 overflow-hidden cursor-pointer"
       >
         <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full hover:translate-x-full transition-transform duration-700" />
-        <Flame size={22} className="fill-black" />
+        <Flame size={18} className="fill-black" />
         {selectedNumbers.length > 0 ? str.enterWith : str.goBoard}
-        <ArrowRight size={22} />
+        <ArrowRight size={18} />
       </button>
     </div>
   );

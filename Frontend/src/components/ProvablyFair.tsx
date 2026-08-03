@@ -9,10 +9,7 @@ import {
   ShieldAlert,
   KeyRound,
   Hash,
-  Lock,
-  Sparkles,
   RotateCcw,
-  Clock,
   Copy,
 } from "lucide-react";
 import { useAppStore } from "../lib/store";
@@ -94,19 +91,6 @@ export default function ProvablyFair() {
     subtitle: isAm
       ? "እያንዳንዱ ዙር በክሪፕቶግራፊ የተመሰጠረ እና በእርስዎ የሚረጋገጥ ነው።"
       : "Every round is cryptographically verifiable by you.",
-    howTitle: isAm ? "እንዴት ይሰራል?" : "How it works",
-    step1Title: isAm ? "1. ቁርጠኝነት (Commit)" : "1. Commit",
-    step1Desc: isAm
-      ? "ከጨዋታው በፊት የሰርቨር ሴድ ሃሽ (Server Seed Hash) ይታተማል።"
-      : "A SHA-256 hash of the server seed is published before the draw.",
-    step2Title: isAm ? "2. ጨዋታ" : "2. Play",
-    step2Desc: isAm
-      ? "የጨዋታው ውጤት በ HMAC-SHA256 በእርስዎ ሴድ ይወሰናል።"
-      : "The draw is derived from your seed via HMAC-SHA256.",
-    step3Title: isAm ? "3. ማረጋገጥ" : "3. Verify",
-    step3Desc: isAm
-      ? "ከዙሩ ማብቂያ በኋላ ሴዱ ይገለጻል፤ ውጤቱንም ማረጋገጥ ይችላሉ።"
-      : "After the draw, the seed is revealed and you verify the result.",
     autoTab: isAm ? "በራስ-ሰር ማረጋገጥ" : "Auto Verify",
     manualTab: isAm ? "በእጅ ማረጋገጥ" : "Manual",
     selectRound: isAm ? "የተጠናቀቀ ዙር ይምረጡ" : "Select a Completed Round",
@@ -250,53 +234,6 @@ export default function ProvablyFair() {
             <h2 className="font-extrabold text-white text-base">{str.title}</h2>
             <p className="text-[11px] text-slate-400">{str.subtitle}</p>
           </div>
-        </div>
-      </div>
-
-      {/* How it works */}
-      <div className="glass-card rounded-2xl p-4 border border-white/10 space-y-3">
-        <div className="text-[11px] font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-          <Sparkles size={12} className="text-emerald-400" />
-          {str.howTitle}
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            {
-              icon: Lock,
-              title: str.step1Title,
-              desc: str.step1Desc,
-              color: "text-[#C084FC] bg-[#C084FC]/10",
-            },
-            {
-              icon: Clock,
-              title: str.step2Title,
-              desc: str.step2Desc,
-              color: "text-[#22D3EE] bg-[#22D3EE]/10",
-            },
-            {
-              icon: ShieldCheck,
-              title: str.step3Title,
-              desc: str.step3Desc,
-              color: "text-emerald-400 bg-emerald-500/10",
-            },
-          ].map(({ icon: Icon, title, desc, color }) => (
-            <div
-              key={title}
-              className="bg-black/40 rounded-xl p-2.5 border border-white/5"
-            >
-              <div
-                className={`w-7 h-7 rounded-lg flex items-center justify-center mb-2 ${color}`}
-              >
-                <Icon size={15} />
-              </div>
-              <div className="text-[11px] font-extrabold text-white leading-tight">
-                {title}
-              </div>
-              <div className="text-[9px] text-slate-400 mt-1 leading-snug">
-                {desc}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
 

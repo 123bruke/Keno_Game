@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Trophy, X, Sparkles, ShieldCheck, Copy, CheckCircle2, ChevronRight } from "lucide-react";
+import { Trophy, X } from "lucide-react";
 import { playSound } from "../lib/sound";
 import { useAppStore } from "../lib/store";
 
@@ -31,28 +30,9 @@ export default function GameResult({
   };
   onClose: () => void;
 }) {
-  const { language, setActiveTab } = useAppStore();
+  const { language } = useAppStore();
   const ticket = result.settledTickets[0];
   const isWin = (ticket?.payout ?? 0) > 0;
-  const fairness = result.fairness;
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    if (!fairness) return;
-    const text = `Server Seed: ${fairness.serverSeed}\nServer Seed Hash: ${fairness.serverSeedHash}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      playSound("success");
-      setTimeout(() => setCopied(false), 2500);
-    } catch {}
-  };
-
-  const goVerify = () => {
-    playSound("select");
-    onClose();
-    setActiveTab("fair");
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-fade-in">
@@ -137,51 +117,6 @@ export default function GameResult({
             </span>
           </div>
         </div>
-
-        {/* Fairness Revealed */}
-        {fairness?.serverSeed && (
-          <div className="space-y-2 text-[10px] font-mono bg-[#000000] p-3 rounded-xl border border-emerald-500/20">
-            <div className="flex items-center justify-between">
-              <span className="flex items-center gap-1 text-emerald-400 font-sans font-bold text-[11px]">
-                <ShieldCheck size={12} />
-                {language === "am" ? "ፍትሃዊነት ይፈትሹ" : "Provably Fair"}
-              </span>
-              <button
-                onClick={handleCopy}
-                className="flex items-center gap-1 text-slate-400 hover:text-white transition-all active:scale-95"
-                aria-label="Copy seeds"
-              >
-                {copied ? (
-                  <span className="flex items-center gap-1 text-emerald-400 font-bold">
-                    <CheckCircle2 size={12} />
-                    {language === "am" ? "ተቀድቷል!" : "Copied!"}
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1">
-                    <Copy size={12} />
-                    {language === "am" ? "ሴዶችን ቅዳ" : "Copy"}
-                  </span>
-                )}
-              </button>
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-start justify-between gap-3">
-                <span className="text-slate-500 shrink-0">{language === "am" ? "ሰርቨር ሴድ:" : "Server Seed:"}</span>
-                <span className="text-white break-all text-right">{fairness.serverSeed}</span>
-              </div>
-              <div className="flex items-start justify-between gap-3">
-                <span className="text-slate-500 shrink-0">{language === "am" ? "ሃሽ:" : "Hash:"}</span>
-                <span className="text-emerald-400 break-all text-right">{fairness.serverSeedHash}</span>
-              </div>
-            </div>
-            <button
-              onClick={goVerify}
-              className="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-[#22D3EE] font-sans font-bold text-[11px] flex items-center justify-center gap-1 transition-all"
-            >
-              {language === "am" ? "አረጋግጥ" : "Verify this round"} <ChevronRight size={13} />
-            </button>
-          </div>
-        )}
 
         <button
           onClick={() => { playSound('success'); onClose(); }}

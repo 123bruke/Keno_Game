@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Trophy, X, Radio, Dices, XCircle, ShieldCheck, Copy, CheckCircle2, ChevronRight } from "lucide-react";
+import { Trophy, X, Radio, Dices, XCircle } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { type LiveSettledEvent } from "../lib/socket";
 import { useAppStore } from "../lib/store";
@@ -15,13 +15,11 @@ export default function LiveReveal() {
     setPendingClassic,
     language,
     vibrationEnabled,
-    setActiveTab,
   } = useAppStore();
   const qc = useQueryClient();
 
   const [revealed, setRevealed] = useState(0);
   const [phase, setPhase] = useState<"drawing" | "result">("drawing");
-  const [copied, setCopied] = useState(false);
 
   const evt: LiveSettledEvent | null = liveSettled;
 
@@ -63,17 +61,6 @@ export default function LiveReveal() {
     setPendingClassic(null);
     setRevealed(0);
     setPhase("drawing");
-  };
-
-  const handleCopySeeds = async () => {
-    if (!evt?.serverSeed) return;
-    const text = `Server Seed: ${evt.serverSeed}\nServer Seed Hash: ${evt.serverSeedHash ?? ""}\nRound: #${evt.roundNumber}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      playSound("success");
-      setTimeout(() => setCopied(false), 2500);
-    } catch {}
   };
 
   if (!evt) return null;
@@ -227,48 +214,6 @@ export default function LiveReveal() {
               {won ? `+${evt.playerPayout.toFixed(2)} ETB` : `-${totalBet.toFixed(2)} ETB`}
             </span>
           </div>
-
-          {evt.serverSeed && (
-            <div className="space-y-1 text-[9px] font-mono bg-black rounded-lg px-2.5 py-2 border border-emerald-500/20">
-              <div className="flex items-center justify-between">
-                <span className="flex items-center gap-1 text-emerald-400 font-sans font-bold text-[10px]">
-                  <ShieldCheck size={11} />
-                  {language === "am" ? "ፍትሃዊነት" : "Provably Fair"}
-                </span>
-                <button
-                  onClick={handleCopySeeds}
-                  className="flex items-center gap-1 text-slate-400 hover:text-white transition-all active:scale-95"
-                  aria-label="Copy seeds"
-                >
-                  {copied ? (
-                    <span className="flex items-center gap-1 text-emerald-400 font-bold">
-                      <CheckCircle2 size={10} /> {language === "am" ? "ተቀድቷል!" : "Copied!"}
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1">
-                      <Copy size={10} /> {language === "am" ? "ቅዳ" : "Copy"}
-                    </span>
-                  )}
-                </button>
-              </div>
-              <div className="flex items-start justify-between gap-2">
-                <span className="text-slate-500 shrink-0">{language === "am" ? "ሰርቨር ሴድ:" : "Server Seed:"}</span>
-                <span className="text-white break-all text-right">{evt.serverSeed}</span>
-              </div>
-              {evt.serverSeedHash && (
-                <div className="flex items-start justify-between gap-2">
-                  <span className="text-slate-500 shrink-0">{language === "am" ? "ሃሽ:" : "Hash:"}</span>
-                  <span className="text-emerald-400 break-all text-right">{evt.serverSeedHash}</span>
-                </div>
-              )}
-              <button
-                onClick={() => { playSound("select"); handleClose(); setActiveTab("fair"); }}
-                className="w-full py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[#22D3EE] font-sans font-bold text-[10px] flex items-center justify-center gap-1 transition-all"
-              >
-                {language === "am" ? "አረጋግጥ" : "Verify this round"} <ChevronRight size={11} />
-              </button>
-            </div>
-          )}
 
           <button
             onClick={() => { playSound("success"); handleClose(); }}
