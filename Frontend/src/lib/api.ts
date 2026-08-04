@@ -208,6 +208,8 @@ export interface CurrentRound {
   status: string;
   startedAt: string;
   drawIntervalSec?: number;
+  minBet?: number;
+  maxBet?: number;
   serverSeedHash?: string;
   clientSeed?: string;
   nonce?: number;

@@ -54,6 +54,8 @@ export class GameController {
         status: game.status,
         startedAt: game.startedAt,
         drawIntervalSec: Number(settings.drawIntervalSec) || 30,
+        minBet: Number(settings.minBet) || 1,
+        maxBet: Number(settings.maxBet) || 10000,
         serverSeedHash: fairness.serverSeedHash,
         clientSeed: fairness.clientSeed,
         nonce: fairness.nonce,

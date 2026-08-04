@@ -55,6 +55,9 @@ interface AppState {
   // True while a classic round is being drawn (broadcast via socket).
   classicDrawing: boolean;
   setClassicDrawing: (drawing: boolean) => void;
+  // Global toast notification.
+  toast: string | null;
+  setToast: (toast: string | null) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -96,4 +99,6 @@ export const useAppStore = create<AppState>((set) => ({
   setLiveSettled: (evt) => set({ liveSettled: evt }),
   classicDrawing: false,
   setClassicDrawing: (drawing) => set({ classicDrawing: drawing }),
+  toast: null,
+  setToast: (toast) => set({ toast }),
 }));
