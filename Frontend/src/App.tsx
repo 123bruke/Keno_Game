@@ -52,7 +52,9 @@ function AppContent() {
     setCurrentUser,
     language,
     setPendingClassic,
-
+    toast,
+    setToast,
+    liveSettled,
   } = useAppStore();
 
   const TABS = language === "am" ? TABS_AM : TABS_EN;
@@ -63,7 +65,17 @@ function AppContent() {
   const [gameResultData, setGameResultData] = useState<any>(null);
   const [drawWinning, setDrawWinning] = useState<number[]>([]);
   const [drawRevealed, setDrawRevealed] = useState(0);
-  const [toast, setToast] = useState<string | null>(null);
+
+  // Clear the board once a game finishes so it is ready for the next round.
+  const resetBoard = () => {
+    setDrawWinning([]);
+    setDrawRevealed(0);
+  };
+
+  // Classic round settled → wipe any leftover draw highlight from the board.
+  useEffect(() => {
+    if (liveSettled) resetBoard();
+  }, [liveSettled]);
 
   // Auto-dismiss toast notifications
   useEffect(() => {
@@ -94,6 +106,7 @@ function AppContent() {
   }, []);
 
   const handlePlay = () => {
+    resetBoard();
     playMutation.mutate(
       { selectedNumbers, betAmount, mode: gameMode },
       {
@@ -116,7 +129,7 @@ function AppContent() {
             setPendingClassic({ gameId: data.gameId, roundNumber: data.roundNumber, ticketCount: 1 });
             clearSelection();
             setToast(language === "am"
-              ? `ትኬት ለክላሲክ ዙር #${data.roundNumber} ተመዝግቧል! ውጤቱ በቀጥታ ይታያል`
+              ? `ትኬት ለክላሲክ ኬኖ #${data.roundNumber} ተመዝግቧል! ውጤቱ በቀጥታ ይታያል`
               : `Ticket accepted for Classic Round #${data.roundNumber}! Live result will appear shortly`);
           }
         },
@@ -217,7 +230,7 @@ function AppContent() {
       <LiveSocket />
 
       {/* Modals */}
-      {gameResultData && <GameResult result={gameResultData} onClose={() => setGameResultData(null)} />}
+      {gameResultData && <GameResult result={gameResultData} onClose={() => { resetBoard(); setGameResultData(null); }} />}
     </div>
   );
 }

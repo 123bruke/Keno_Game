@@ -1,7 +1,7 @@
 import { useAppStore } from "../lib/store";
 import { playSound } from "../lib/sound";
-import { useWallet, useQuickPick } from "../lib/hooks";
-import { Zap, Trash2, Clock, Flame } from "lucide-react";
+import { useWallet, useQuickPick, useCurrentRound } from "../lib/hooks";
+import { Zap, Trash2, Clock, Flame, Minus, Plus } from "lucide-react";
 
 // Default multiplier table preview mapping
 const MULTIPLIERS_PREVIEW: Record<number, Record<number, number>> = {
@@ -17,6 +17,8 @@ const MULTIPLIERS_PREVIEW: Record<number, Record<number, number>> = {
   10: { 0: 2, 5: 2, 6: 15, 7: 100, 8: 500, 9: 3000, 10: 100000 },
 };
 
+const STEP = 5;
+
 export default function BetControls({
   onPlay,
   isPlaying,
@@ -29,16 +31,29 @@ export default function BetControls({
     setSelection,
     clearSelection,
     betAmount,
+    setBetAmount,
     gameMode,
     setGameMode,
     language,
   } = useAppStore();
   const { data: wallet } = useWallet();
+  const { data: roundData } = useCurrentRound();
   const quickPickMutation = useQuickPick();
 
+  const minBet = Number(roundData?.minBet) || 10;
+  const maxBet = Math.max(minBet, Number(wallet?.totalBalance) || 0);
+
   const count = selectedNumbers.length;
-  const canPlay = count >= 1 && count <= 10 && betAmount > 0 && (wallet?.totalBalance ?? 1000) >= betAmount;
+  const canPlay = count >= 1 && count <= 10 && betAmount >= minBet && (wallet?.totalBalance ?? 1000) >= betAmount;
   const multiplierTable = MULTIPLIERS_PREVIEW[count] || {};
+
+  const adjustBet = (delta: number) => {
+    const next = Math.min(maxBet, Math.max(minBet, betAmount + delta));
+    if (next !== betAmount) {
+      playSound("click");
+      setBetAmount(next);
+    }
+  };
 
   const handleQuickPick = (numCount: number) => {
     quickPickMutation.mutate(numCount, {
@@ -78,7 +93,7 @@ export default function BetControls({
           }`}
         >
           <Clock size={14} />
-          {language === "am" ? "ክላሲክ ዙር" : "Classic Round"}
+          {language === "am" ? "ክላሲክ ኬኖ" : "Classic Round"}
         </button>
       </div>
 
@@ -127,10 +142,44 @@ export default function BetControls({
         </button>
       </div>
 
-      {/* Active Wager Info Badge */}
-      <div className="flex justify-between items-center text-xs text-slate-400 bg-[#09090b] px-3 py-2 rounded-xl border border-white/10">
-        <span>{language === "am" ? "ንቁ ውርርድ (በመነሻ ገጽ የተዘጋጀ):" : "Active Wager (set in Home):"}</span>
-        <span className="font-extrabold text-[#22D3EE] font-mono">{betAmount} ETB</span>
+      {/* Wager Selector */}
+      <div className="glass-card rounded-xl p-3 border border-white/10 space-y-2.5">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] text-slate-400">{language === "am" ? "የውርርድ መጠን (ETB)" : "Wager Amount (ETB)"}</span>
+          <span className="font-bold text-[#22D3EE] font-mono text-sm">{betAmount} ETB</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => adjustBet(-STEP)}
+            disabled={betAmount <= minBet}
+            className="w-9 h-9 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0 disabled:opacity-30 cursor-pointer"
+            aria-label="-"
+          >
+            <Minus size={14} />
+          </button>
+          <input
+            type="number"
+            min={minBet}
+            max={maxBet}
+            value={betAmount}
+            onChange={(e) => setBetAmount(Math.max(minBet, Math.min(maxBet, Number(e.target.value) || minBet)))}
+            className="w-full h-9 px-2 rounded-xl bg-[#000000] border border-white/10 text-white font-mono text-sm text-center focus:outline-none focus:border-[#C084FC] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+          />
+          <button
+            onClick={() => adjustBet(STEP)}
+            className="w-9 h-9 rounded-xl bg-[#12121c] border border-white/10 text-slate-300 hover:text-white hover:border-white/25 active:scale-90 transition-all flex items-center justify-center shrink-0 cursor-pointer"
+            aria-label="+"
+          >
+            <Plus size={14} />
+          </button>
+          <button
+            onClick={() => { playSound("click"); setBetAmount(maxBet); }}
+            className="h-9 px-3 rounded-xl bg-gradient-to-r from-[#C084FC]/20 to-[#22D3EE]/20 border border-[#C084FC]/30 text-[#C084FC] text-[11px] font-black hover:opacity-90 active:scale-95 transition-all shrink-0 cursor-pointer"
+          >
+            {language === "am" ? "ከፍተኛ" : "Max"}
+          </button>
+        </div>
       </div>
 
       {/* Play Action Button */}

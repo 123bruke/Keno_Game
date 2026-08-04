@@ -35,7 +35,7 @@ export default function ClassicCountdown({ compact }: { compact?: boolean }) {
         {paused ? (
           <span className="flex items-center gap-1.5 text-[#22D3EE] font-bold animate-pulse">
             <Timer size={13} />
-            {language === "am" ? "ውርድ እየተካሄደ ነው..." : "Drawing..."}
+            {language === "am" ? "ውርርድ እየተካሄደ ነው..." : "Drawing..."}
           </span>
         ) : (
           <span className="flex items-center gap-1.5 text-slate-300 font-mono text-xs">
@@ -55,7 +55,7 @@ export default function ClassicCountdown({ compact }: { compact?: boolean }) {
       <div className="flex items-center justify-between text-xs mb-2">
         {paused ? (
           <span className="font-bold text-[#22D3EE] animate-pulse">
-            {language === "am" ? "ውርድ እየተካሄደ ነው..." : "Drawing in progress..."}
+            {language === "am" ? "ውርርድ እየተካሄደ ነው..." : "Drawing in progress..."}
           </span>
         ) : (
           <span className="text-slate-400">{label}</span>

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useAppStore } from "../lib/store";
 import { playSound } from "../lib/sound";
 import { useWallet, useCurrentRound } from "../lib/hooks";
@@ -17,6 +18,7 @@ import {
 
 const PRESETS = [10, 25, 50, 100, 250];
 const STEP = 5;
+const MIN_BET = 10;
 
 export default function Home() {
   const {
@@ -28,6 +30,7 @@ export default function Home() {
     setBetAmount,
     currentUser,
     language,
+    setToast,
   } = useAppStore();
 
   const { data: wallet } = useWallet();
@@ -35,11 +38,28 @@ export default function Home() {
 
   const isAm = language === "am";
 
+  // Dynamic minimum bet set by the admin (falls back to MIN_BET).
+  const minBet = Number(roundData?.minBet) || MIN_BET;
+
+  // If the current wager falls below the admin-set minimum, clamp it and warn.
+  useEffect(() => {
+    if (!roundData?.minBet) return;
+    const min = Number(roundData.minBet);
+    if (betAmount < min) {
+      setBetAmount(min);
+      setToast(
+        isAm
+          ? `ዝቅተኛው የውርርድ መጠን ${min} ETB ነው`
+          : `Minimum bet amount is ${min} ETB`
+      );
+    }
+  }, [roundData?.minBet, betAmount, isAm]);
+
   const str = {
     greeting: isAm ? "እንኳን ደህና መጡ" : "Welcome Back",
     player: isAm ? "የኬኖ ተጫዋች" : "Keno Player",
     settings: isAm ? "ማስተካከያዎች" : "Settings",
-    activeRound: isAm ? "ንቁ የክላሲክ ዙር" : "Active Classic Round",
+    activeRound: isAm ? "ንቁ የክላሲክ ኬኖ" : "Active Classic Round",
     round: (n: number) => (isAm ? `ዙር #${n}` : `Round #${n}`),
     selectMode: isAm ? "የጨዋታ ዓይነት ይምረጡ" : "Select Game Mode",
     instantTitle: isAm ? "ፈጣን ኬኖ" : "Instant Keno",
@@ -47,7 +67,7 @@ export default function Home() {
       ? "ቁጥሮች ወዲያውኑ ይወጣሉ፣ ወዲያውኑ ይከፈላል።"
       : "Draws numbers immediately with instant payouts.",
     fastBadge: isAm ? "ፈጣን" : "FAST",
-    classicTitle: isAm ? "ክላሲክ ዙር" : "Classic Round",
+    classicTitle: isAm ? "ክላሲክ ኬኖ" : "Classic Round",
     classicDesc: isAm
       ? "በየ30 ሰከንድ የሚወጡ የቡድን ዙሮች።"
       : "Scheduled multiplayer rounds drawn every 30s.",
@@ -68,15 +88,15 @@ export default function Home() {
   };
 
   const adjustBet = (delta: number) => {
-    const max = Math.max(1, Number(wallet?.totalBalance) || 0);
-    const next = Math.min(max, Math.max(1, betAmount + delta));
+    const max = Math.max(minBet, Number(wallet?.totalBalance) || 0);
+    const next = Math.min(max, Math.max(minBet, betAmount + delta));
     if (next !== betAmount) {
       playSound("click");
       setBetAmount(next);
     }
   };
 
-  const maxBet = Math.max(1, Number(wallet?.totalBalance) || 0);
+  const maxBet = Math.max(minBet, Number(wallet?.totalBalance) || 0);
   const initial = (currentUser?.firstName?.[0] || currentUser?.username?.[0] || "K").toUpperCase();
 
   return (
@@ -248,10 +268,10 @@ export default function Home() {
           </button>
           <input
             type="number"
-            min={1}
+            min={minBet}
             max={maxBet}
             value={betAmount}
-            onChange={(e) => setBetAmount(Math.max(1, Math.min(maxBet, Number(e.target.value) || 1)))}
+            onChange={(e) => setBetAmount(Math.max(minBet, Math.min(maxBet, Number(e.target.value) || minBet)))}
             placeholder={str.customPh}
             className="w-full h-10 px-3 rounded-xl bg-[#000000] border border-white/10 text-white font-mono text-sm text-center focus:outline-none focus:border-[#C084FC] transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
@@ -275,7 +295,8 @@ export default function Home() {
             <button
               key={p}
               onClick={() => { playSound(); setBetAmount(p); }}
-              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              disabled={p < minBet}
+              className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed ${
                 betAmount === p
                   ? "bg-gradient-to-r from-[#C084FC] to-[#22D3EE] text-black shadow-lg shadow-[#C084FC]/25 scale-[1.03]"
                   : "bg-[#12121c] text-slate-300 hover:bg-[#1a1a2e]"
